@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Availability Calendar</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .filters-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filters-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+            opacity: 1;
+        }
+
+        .filter-group {
+            position: relative;
+            z-index: 1;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .filter-group select {
+            width: 100%;
+            max-width: 300px;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
+            cursor: pointer;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .filter-group select:hover {
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .calendar-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calendar-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* Custom FullCalendar Styling */
+        .fc {
+            position: relative;
+            z-index: 1;
+        }
+
+        .fc .fc-toolbar {
+            margin-bottom: 25px;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fc .fc-button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .fc .fc-button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .fc .fc-button-primary:focus {
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .fc .fc-button-primary:disabled {
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .fc .fc-button-primary.fc-button-active {
+            background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Calendar Grid Styling */
+        .fc .fc-scrollgrid {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .fc .fc-col-header-cell {
+            background: rgba(248, 250, 252, 0.9);
+            border-color: rgba(226, 232, 240, 0.5);
+            font-weight: 700;
+            color: #4a5568;
+            padding: 15px 8px;
+        }
+
+        .fc .fc-daygrid-day,
+        .fc .fc-timegrid-slot {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(226, 232, 240, 0.3);
+            transition: background-color 0.2s ease;
+        }
+
+        .fc .fc-daygrid-day:hover,
+        .fc .fc-timegrid-slot:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .fc .fc-day-today {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 4px;
+        }
+
+        /* Event Styling */
+        .fc-event {
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 2px 0;
+        }
+
+        .fc-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Default tutor event styling */
+        .fc-event {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Different colors for different tutors */
+        .fc-event[data-tutor*="Tabatha"] {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .fc-event[data-tutor*="Jennifer"] {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+
+        .fc-event[data-tutor*="Michael"] {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+
+        .fc-event[data-tutor*="Lisa"] {
+            background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%);
+        }
+
+        .fc-event[data-tutor*="David"] {
+            background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
+        }
+
+        .fc-event[data-tutor*="Sarah"] {
+            background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
+        }
+
+        /* Time Grid Styling */
+        .fc .fc-timegrid-axis {
+            background: rgba(248, 250, 252, 0.9);
+            border-color: rgba(226, 232, 240, 0.3);
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .fc .fc-timegrid-slot-label {
+            color: #718096;
+            font-weight: 500;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-left: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-left: 15px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        /* Error State */
+        .error-message {
+            background: rgba(254, 215, 215, 0.9);
+            color: #742a2a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(254, 178, 178, 0.5);
+            text-align: center;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        /* Status Indicator */
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .connection-status.connected {
+            background: rgba(198, 246, 213, 0.95);
+            color: #22543d;
+            border: 2px solid rgba(154, 230, 180, 0.5);
+        }
+
+        .connection-status.error {
+            background: rgba(254, 215, 215, 0.95);
+            color: #742a2a;
+            border: 2px solid rgba(254, 178, 178, 0.5);
+        }
+
+        .connection-status.loading {
+            background: rgba(254, 235, 200, 0.95);
+            color: #7c2d12;
+            border: 2px solid rgba(251, 211, 141, 0.5);
+        }
+
+        /* Tooltip Styling */
+        .fc-popover {
+            background: rgba(0, 0, 0, 0.9);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .fc-popover-header {
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 16px 8px;
+        }
+
+        .fc-popover-body {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px 12px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .filters-container,
+            .calendar-container {
+                padding: 20px;
+            }
+            
+            .filter-group select {
+                max-width: 100%;
+            }
+            
+            .connection-status {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+
+            .fc .fc-toolbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .fc .fc-toolbar-title {
+                font-size: 1.4rem;
+                order: -1;
+            }
+
+            .fc .fc-button-group {
+                display: flex;
+                justify-content: center;
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .fc-event {
+                font-size: 0.75rem;
+                padding: 2px 4px;
+            }
+        }
+
+        /* Legend */
+        .tutor-legend {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(226, 232, 240, 0.3);
+        }
+
+        .legend-title {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #4a5568;
+            padding: 8px 12px;
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .legend-item:hover {
+            background: rgba(248, 250, 252, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation for new events */
+        @keyframes eventFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .fc-event.new-event {
+            animation: eventFadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Status Indicator -->
+    <div id="connectionStatus" class="connection-status loading">🔄 Loading calendar...</div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📅 Tutor Availability Calendar</h1>
+            <p>View real-time tutor availability and schedule appointments</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="tutorFilter">🎓 Filter by Tutor:</label>
+                <select id="tutorFilter">
+                    <option value="all">All Tutors</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="calendar-container">
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading availability...</div>
+            </div>
+            
+            <div id="calendar"></div>
+            
+            <!-- Legend -->
+            <div class="tutor-legend">
+                <div class="legend-title">👥 Tutor Color Legend</div>
+                <div id="tutorLegend" class="legend-grid">
+                    <!-- Legend items will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
+        
+        let calendar;
+        let allEvents = [];
+        let tutorColors = {};
+        
+        // Predefined color schemes for tutors
+        const colorSchemes = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+            'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
+            'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)',
+            'linear-gradient(135deg, #d69e2e 0%, #b7791f 100%)',
+            'linear-gradient(135deg, #805ad5 0%, #6b46c1 100%)',
+            'linear-gradient(135deg, #38b2ac 0%, #319795 100%)',
+            'linear-gradient(135deg, #3182ce 0%, #2c5282 100%)',
+            'linear-gradient(135deg, #e53e3e 0%, #9b2c2c 100%)',
+            'linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)'
+        ];
+
+        function updateConnectionStatus(status, message) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.className = `connection-status ${status}`;
+            
+            switch(status) {
+                case 'connected':
+                    statusDiv.innerHTML = '✅ Calendar loaded successfully';
+                    // Hide after 3 seconds
+                    setTimeout(() => {
+                        statusDiv.style.opacity = '0.7';
+                    }, 3000);
+                    break;
+                case 'error':
+                    statusDiv.innerHTML = '⚠️ Failed to load data';
+                    break;
+                case 'loading':
+                    statusDiv.innerHTML = '🔄 Loading calendar...';
+                    break;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showError(message) {
+            const calendarContainer = document.querySelector('.calendar-container');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <strong>⚠️ Error Loading Calendar</strong><br>
+                ${message}<br>
+                <small>Please refresh the page or try again later.</small>
+            `;
+            calendarContainer.insertBefore(errorDiv, calendarContainer.firstChild);
+        }
+
+        // Enhanced CSV parsing function to handle quoted fields
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            let i = 0;
+
+            while (i < row.length) {
+                const char = row[i];
+                const nextChar = row[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        // Escaped quote
+                        current += '"';
+                        i += 2;
+                    } else {
+                        // Toggle quote state
+                        inQuotes = !inQuotes;
+                        i++;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    // Field separator
+                    result.push(current.trim());
+                    current = '';
+                    i++;
+                } else {
+                    current += char;
+                    i++;
+                }
+            }
+
+            // Don't forget the last field
+            result.push(current.trim());
+            return result;
+        }
+
+        async function loadData() {
+            try {
+                updateConnectionStatus('loading');
+                showLoading();
+
+                console.log('Fetching tutor availability data...');
+                const response = await fetch(sheetCSV);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                console.log('CSV data loaded successfully');
+
+                const rows = text.split("\n").slice(1); // skip header
+                let events = [];
+                let tutors = new Set();
+                let colorIndex = 0;
+
+                rows.forEach((row, index) => {
+                    if (!row.trim()) return; // Skip empty rows
+                    
+                    const cols = parseCSVRow(row);
+                    if (cols.length < 3) return;
+
+                    const tutor = cols[0].trim();
+                    const date = cols[1].trim();
+                    const slots = cols[2].trim();
+
+                    if (!tutor || !date) return;
+
+                    tutors.add(tutor);
+                    
+                    // Assign color to tutor if not already assigned
+                    if (!tutorColors[tutor]) {
+                        tutorColors[tutor] = colorSchemes[colorIndex % colorSchemes.length];
+                        colorIndex++;
+                    }
+
+                    if (slots && slots !== "Busy all day" && slots !== "") {
+                        // Split by comma to get individual time slots
+                        const timeSlots = slots.split(",");
+                        
+                        timeSlots.forEach(slot => {
+                            const timeRange = slot.trim();
+                            if (timeRange.includes("-")) {
+                                const [startTime, endTime] = timeRange.split("-").map(t => t.trim());
+                                
+                                if (startTime && endTime) {
+                                    // Create a separate event for each time slot
+                                    events.push({
+                                        title: `${tutor} - Available`,
+                                        start: `${date}T${startTime}`,
+                                        end: `${date}T${endTime}`,
+                                        extendedProps: { 
+                                            tutor: tutor,
+                                            timeSlot: timeRange,
+                                            originalSlots: slots
+                                        },
+                                        backgroundColor: 'transparent',
+                                        borderColor: 'transparent',
+                                        className: 'tutor-event',
+                                        display: 'block'
+                                    });
+                                    
+                                    console.log(`Added event: ${tutor} on ${date} from ${startTime} to ${endTime}`);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                console.log(`Loaded ${events.length} individual time slots for ${tutors.size} tutors`);
+                updateConnectionStatus('connected');
+                
+                return { events, tutors: Array.from(tutors) };
+                
+            } catch (error) {
+                console.error('Error loading tutor availability data:', error);
+                updateConnectionStatus('error');
+                showError(error.message);
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function createTutorLegend(tutors) {
+            const legendContainer = document.getElementById('tutorLegend');
+            legendContainer.innerHTML = '';
+            
+            tutors.forEach(tutor => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.background = tutorColors[tutor] || colorSchemes[0];
+                
+                const label = document.createElement('span');
+                label.textContent = tutor;
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(label);
+                legendContainer.appendChild(legendItem);
+            });
+        }
+
+        function applyTutorColors() {
+            // Apply colors to events using CSS
+            const style = document.createElement('style');
+            let css = '';
+            
+            Object.entries(tutorColors).forEach(([tutor, color]) => {
+                css += `
+                    .fc-event[data-tutor*="${tutor}"] {
+                        background: ${color} !important;
+                        border: none !important;
+                    }
+                `;
+            });
+            
+            style.textContent = css;
+            document.head.appendChild(style);
+        }
+
+        function formatEventTitle(eventInfo) {
+            const tutor = eventInfo.event.extendedProps.tutor;
+            const timeSlot = eventInfo.event.extendedProps.timeSlot;
+            return `${tutor}\n${timeSlot}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            try {
+                const { events, tutors } = await loadData();
+                allEvents = events;
+
+                // Populate tutor filter dropdown
+                const tutorFilter = document.getElementById("tutorFilter");
+                tutors.forEach(tutor => {
+                    const option = document.createElement("option");
+                    option.value = tutor;
+                    option.textContent = tutor;
+                    tutorFilter.appendChild(option);
+                });
+
+                // Create tutor legend
+                createTutorLegend(tutors);
+                applyTutorColors();
+
+                // Initialize FullCalendar
+                const calendarEl = document.getElementById("calendar");
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                    },
+                    height: 'auto',
+                    events: events,
+                    eventDidMount: function(info) {
+                        // Apply custom styling
+                        const tutor = info.event.extendedProps.tutor;
+                        info.el.setAttribute('data-tutor', tutor);
+                        
+                        // Add hover tooltip
+                        info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+                        
+                        // Add animation class
+                        setTimeout(() => {
+                            info.el.classList.add('new-event');
+                        }, Math.random() * 500);
+                    },
+                    eventClick: function(info) {
+                        // Handle event click - could open booking modal
+                        alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+                    },
+                    loading: function(isLoading) {
+                        if (isLoading) {
+                            showLoading();
+                        } else {
+                            hideLoading();
+                        }
+                    }
+                });
+
+                calendar.render();
+
+                // Filter by tutor dropdown functionality
+                tutorFilter.addEventListener("change", function() {
+                    const selectedTutor = this.value;
+                    
+                    calendar.getEvents().forEach(event => {
+                        if (selectedTutor === "all" || event.extendedProps.tutor === selectedTutor) {
+                            event.setProp('display', 'auto');
+                        } else {
+                            event.setProp('display', 'none');
+                        }
+                    });
+                    
+                    // Update legend visibility
+                    const legendItems = document.querySelectorAll('.legend-item');
+                    legendItems.forEach(item => {
+                        const tutorName = item.querySelector('span').textContent;
+                        if (selectedTutor === "all" || tutorName === selectedTutor) {
+                            item.style.opacity = '1';
+                        } else {
+                            item.style.opacity = '0.3';
+                        }
+                    });
+                });
+
+                // Handle responsive view changes
+                function handleResize() {
+                    if (window.innerWidth < 768) {
+                        calendar.changeView('listWeek');
+                    } else {
+                        calendar.changeView('timeGridWeek');
+                    }
+                }
+
+                window.addEventListener('resize', handleResize);
+
+                console.log('Calendar initialized successfully');
+
+            } catch (error) {
+                console.error('Failed to initialize calendar:', error);
+                showError('Failed to initialize calendar. Please refresh the page.');
+            }
+        });
+
+        // Add some interactive features
+        document.addEventListener('keydown', function(e) {
+            if (calendar) {
+                // Navigation shortcuts
+                if (e.key === 'ArrowLeft' && e.ctrlKey) {
+                    e.preventDefault();
+                    calendar.prev();
+                } else if (e.key === 'ArrowRight' && e.ctrlKey) {
+                    e.preventDefault();
+                    calendar.next();
+                } else if (e.key === 'Home' && e.ctrlKey) {
+                    e.preventDefault();
+                    calendar.today();
+                }
+            }
+        });
+
+        // Add smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+
+        // Initialize theme based on system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+</body>
+</html>
