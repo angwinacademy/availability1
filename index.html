@@ -597,9 +597,10 @@
     </div>
 
     <script>
-        // Configuration
-        const availabilityCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
-        const employeeCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=0&single=true&output=csv"; // You'll need to update this with your actual employee sheet URL
+        // Configuration - UPDATE THESE WITH YOUR ACTUAL SHEET ID AND GIDS
+        const SHEET_ID = "1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv";
+        const AVAILABILITY_GID = "0"; // Your availability sheet GID
+        const EMPLOYEE_GID = "1392008086"; // UPDATE THIS with your employee sheet's GID
         
         let calendar;
         let allEvents = [];
@@ -614,13 +615,12 @@
             switch(status) {
                 case 'connected':
                     statusDiv.innerHTML = '✅ Calendar loaded successfully';
-                    // Hide after 3 seconds
                     setTimeout(() => {
                         statusDiv.style.opacity = '0.7';
                     }, 3000);
                     break;
                 case 'error':
-                    statusDiv.innerHTML = '⚠️ Failed to load data';
+                    statusDiv.innerHTML = '⚠️ Using sample data (Google Sheets failed)';
                     break;
                 case 'loading':
                     statusDiv.innerHTML = '🔄 Loading calendar...';
@@ -641,14 +641,34 @@
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-message';
             errorDiv.innerHTML = `
-                <strong>⚠️ Error Loading Calendar</strong><br>
+                <strong>⚠️ Notice</strong><br>
                 ${message}<br>
-                <small>Please refresh the page or try again later.</small>
+                <small>Using sample data for demonstration. Update your Sheet ID and GID values to connect to your actual data.</small>
             `;
             calendarContainer.insertBefore(errorDiv, calendarContainer.firstChild);
         }
 
-        // Enhanced CSV parsing function to handle quoted fields
+        // CORS-friendly fetch with proper error handling
+        async function fetchWithCORS(url) {
+            try {
+                // Try the Google Visualization API endpoint which is more CORS-friendly
+                const vizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${url.includes('gid=') ? url.split('gid=')[1].split('&')[0] : '0'}`;
+                
+                console.log('Attempting to fetch:', vizUrl);
+                const response = await fetch(vizUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.text();
+            } catch (error) {
+                console.error('CORS fetch failed:', error);
+                throw error;
+            }
+        }
+
+        // Enhanced CSV parsing function
         function parseCSVRow(row) {
             const result = [];
             let current = '';
@@ -661,16 +681,13 @@
 
                 if (char === '"') {
                     if (inQuotes && nextChar === '"') {
-                        // Escaped quote
                         current += '"';
                         i += 2;
                     } else {
-                        // Toggle quote state
                         inQuotes = !inQuotes;
                         i++;
                     }
                 } else if (char === ',' && !inQuotes) {
-                    // Field separator
                     result.push(current.trim());
                     current = '';
                     i++;
@@ -680,125 +697,97 @@
                 }
             }
 
-            // Don't forget the last field
             result.push(current.trim());
             return result;
         }
 
-L", color: "#F50CD6" },
-                    { name: "Laura Lynn Florio", subjects: "English, Writing, History, Math, Reading, Social Studies, American Lit, AP Euro, AP Government, AP Human Geography, ASVAB, Homeschool Support, Italian, Psychology, Economics (Micro, Macro, AP), AP Politics, Government (AP, Honors), Public Speaking, AP Language, ACT ELA Prep, SAT ELA prep", color: "#07EBE3" },
-                    { name: "Michelle Glenn", subjects: "English, Science, Biology, Psychology, Homeschool Support", color: "#1876F2" },
-                    { name: "Thomas Glenn", subjects: "Educational Consultant", color: "#2D1F38" },
-                    { name: "Sally Goodson", subjects: "Algebra, Algebra 2, Algebra 3, Geometry, Pre Algebra, PreCalculus", color: "#22ACA0" },
-                    { name: "Taylor Hagerud", subjects: "Algebra, Algebra 2, Algebra 3, Calculus, College Math, Geometry, Pre Algebra, PreCalculus, Prob and Stats, AP Calculus, SAT Math Prep, ACT Math Prep, Academic Support, ACT/SAT prep, Career, College Planning, GED, Math, Praxis Exam, PSAT, Statistics, TEAS-Nursing Test, Trigonometry", color: "#700BBD" },
-                    { name: "Michelle Harrison", subjects: "Homeschool Support, Middle School, Science, Elementary, Reading, Math, English", color: "#D4DCB1" },
-                    { name: "Julie Hendriks", subjects: "Elementary, Math, Reading, Writing, Homeschool Support", color: "#80D359" },
-                    { name: "Alex Prescott", subjects: "English, Academic Support, Middle School, Writing, American Lit, AP Government, ACT ELA Prep, SAT ELA prep", color: "#F2E318" },
-                    { name: "DJ Thorne", subjects: "Math, Algebra, Elementary, Middle School, Pre Algebra", color: "#5A73A1" },
-                    { name: "Cristina Vagni", subjects: "Spanish, French, Italian, Reading, Reading Specialist-Orton Gillingham", color: "#11BD5E" }
-                ];
-
-                // Process employee data
-                mockEmployees.forEach(employee => {
-                    const tutorName = employee.name;
-                    const subjects = employee.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                    const color = employee.color;
-
-                    tutorData[tutorName] = {
-                        subjects: subjects,
-                        color: color
-                    };
-
-                    // Build subject to tutors mapping
-                    subjects.forEach(subject => {
-                        allSubjects.add(subject);
-                        if (!subjectToTutors[subject]) {
-                            subjectToTutors[subject] = [];
-                        }
-                        subjectToTutors[subject].push(tutorName);
-                    });
-                });
-
-                console.log(`Loaded data for ${Object.keys(tutorData).length} tutors with ${allSubjects.size} unique subjects`);
-                return true;
-
-            } catch (error) {
-                console.error('Error loading employee data:', error);
-                return false;
-            }
-        }
-
-        async function loadAvailabilityData() {
+        async function loadEmployeeData() {
             try {
-                console.log('Fetching tutor availability data...');
-                const response = await fetch(availabilityCSV);
+                console.log('Loading employee data...');
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // Try to load from Google Sheets first
+                try {
+                    const employeeUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${EMPLOYEE_GID}`;
+                    const text = await fetchWithCORS(employeeUrl);
+                    
+                    const rows = text.split("\n").slice(1);
+                    
+                    rows.forEach((row) => {
+                        if (!row.trim()) return;
+                        
+                        const cols = parseCSVRow(row);
+                        if (cols.length < 3) return;
+
+                        const tutorName = cols[0].replace(/"/g, '').trim();
+                        const subjects = cols[1].replace(/"/g, '').split(',').map(s => s.trim()).filter(s => s.length > 0);
+                        const color = cols[2].replace(/"/g, '').trim();
+
+                        if (!tutorName) return;
+
+                        tutorData[tutorName] = {
+                            subjects: subjects,
+                            color: color || '#667eea'
+                        };
+
+                        subjects.forEach(subject => {
+                            allSubjects.add(subject);
+                            if (!subjectToTutors[subject]) {
+                                subjectToTutors[subject] = [];
+                            }
+                            subjectToTutors[subject].push(tutorName);
+                        });
+                    });
+
+                    console.log(`Loaded data from Google Sheets for ${Object.keys(tutorData).length} tutors`);
+                    return true;
+                    
+                } catch (sheetsError) {
+                    console.log('Google Sheets availability failed, using sample data:', sheetsError);
+                    throw sheetsError;
                 }
                 
-                const text = await response.text();
-                console.log('Availability CSV data loaded successfully');
-
-                const rows = text.split("\n").slice(1); // skip header
-                let events = [];
-                let tutors = new Set();
-
-                rows.forEach((row, index) => {
-                    if (!row.trim()) return; // Skip empty rows
-                    
-                    const cols = parseCSVRow(row);
-                    if (cols.length < 3) return;
-
-                    const tutor = cols[0].trim();
-                    const date = cols[1].trim();
-                    const slots = cols[2].trim();
-
-                    if (!tutor || !date) return;
-
-                    tutors.add(tutor);
-
-                    if (slots && slots !== "Busy all day" && slots !== "") {
-                        // Split by comma to get individual time slots
-                        const timeSlots = slots.split(",");
-                        
-                        timeSlots.forEach(slot => {
-                            const timeRange = slot.trim();
-                            if (timeRange.includes("-")) {
-                                const [startTime, endTime] = timeRange.split("-").map(t => t.trim());
-                                
-                                if (startTime && endTime) {
-                                    // Create a separate event for each time slot
-                                    events.push({
-                                        title: `${tutor} - Available`,
-                                        start: `${date}T${startTime}`,
-                                        end: `${date}T${endTime}`,
-                                        extendedProps: { 
-                                            tutor: tutor,
-                                            timeSlot: timeRange,
-                                            originalSlots: slots,
-                                            subjects: tutorData[tutor] ? tutorData[tutor].subjects : []
-                                        },
-                                        backgroundColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
-                                        borderColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
-                                        className: 'tutor-event',
-                                        display: 'block'
-                                    });
-                                    
-                                    console.log(`Added event: ${tutor} on ${date} from ${startTime} to ${endTime}`);
-                                }
-                            }
-                        });
-                    }
-                });
-
-                console.log(`Loaded ${events.length} individual time slots for ${tutors.size} tutors`);
-                
-                return { events, tutors: Array.from(tutors) };
-                
             } catch (error) {
-                console.error('Error loading tutor availability data:', error);
-                throw error;
+                // Fallback to sample data
+                console.log('Using sample availability data');
+                
+                const today = new Date();
+                const events = [];
+                const tutors = Object.keys(tutorData);
+                
+                // Generate sample events for the next 7 days
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() + i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    // Add some random availability for each tutor
+                    tutors.forEach((tutor, index) => {
+                        if (Math.random() > 0.3) { // 70% chance of availability
+                            const startHour = 9 + Math.floor(Math.random() * 8); // 9 AM to 4 PM
+                            const duration = 1 + Math.floor(Math.random() * 2); // 1-2 hours
+                            
+                            const startTime = `${startHour.toString().padStart(2, '0')}:00`;
+                            const endTime = `${(startHour + duration).toString().padStart(2, '0')}:00`;
+                            
+                            events.push({
+                                title: `${tutor} - Available`,
+                                start: `${dateStr}T${startTime}`,
+                                end: `${dateStr}T${endTime}`,
+                                extendedProps: { 
+                                    tutor: tutor,
+                                    timeSlot: `${startTime}-${endTime}`,
+                                    subjects: tutorData[tutor] ? tutorData[tutor].subjects : []
+                                },
+                                backgroundColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
+                                borderColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
+                                className: 'tutor-event',
+                                display: 'block'
+                            });
+                        }
+                    });
+                }
+                
+                return { events, tutors, fromSheets: false };
             }
         }
 
@@ -807,19 +796,25 @@ L", color: "#F50CD6" },
                 updateConnectionStatus('loading');
                 showLoading();
 
-                // Load employee data first to get subjects and colors
-                await loadEmployeeData();
+                // Load employee data first
+                const employeeSuccess = await loadEmployeeData();
                 
                 // Then load availability data
-                const { events, tutors } = await loadAvailabilityData();
+                const { events, tutors, fromSheets } = await loadAvailabilityData();
                 
-                updateConnectionStatus('connected');
+                if (employeeSuccess && fromSheets) {
+                    updateConnectionStatus('connected');
+                } else {
+                    updateConnectionStatus('error');
+                    showError('Could not connect to Google Sheets. Please check your SHEET_ID and EMPLOYEE_GID values.');
+                }
+                
                 return { events, tutors };
                 
             } catch (error) {
                 console.error('Error loading data:', error);
                 updateConnectionStatus('error');
-                showError(error.message);
+                showError('Failed to load data from Google Sheets. Using sample data for demonstration.');
                 throw error;
             } finally {
                 hideLoading();
@@ -842,7 +837,6 @@ L", color: "#F50CD6" },
             const subjectFilter = document.getElementById("subjectFilter");
             subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
             
-            // Sort subjects alphabetically
             const sortedSubjects = Array.from(allSubjects).sort();
             sortedSubjects.forEach(subject => {
                 const option = document.createElement("option");
@@ -868,7 +862,6 @@ L", color: "#F50CD6" },
                 const label = document.createElement('span');
                 label.textContent = tutor;
                 
-                // Add subjects as tooltip
                 const subjects = tutorData[tutor] ? tutorData[tutor].subjects.join(', ') : 'No subjects listed';
                 legendItem.setAttribute('title', `Subjects: ${subjects}`);
                 
@@ -890,12 +883,10 @@ L", color: "#F50CD6" },
                 
                 let showEvent = true;
 
-                // Apply tutor filter
                 if (selectedTutor !== "all" && eventTutor !== selectedTutor) {
                     showEvent = false;
                 }
 
-                // Apply subject filter
                 if (selectedSubject !== "all") {
                     const tutorHasSubject = eventSubjects.some(subject => 
                         subject.toLowerCase().includes(selectedSubject.toLowerCase()) ||
@@ -926,10 +917,6 @@ L", color: "#F50CD6" },
                     item.style.transform = 'scale(0.95)';
                 }
             });
-
-            // Update status
-            const statusText = `Showing ${visibleTutors.size} tutors${selectedSubject !== 'all' ? ` for ${selectedSubject}` : ''}`;
-            console.log(statusText);
         }
 
         function clearAllFilters() {
@@ -938,24 +925,14 @@ L", color: "#F50CD6" },
             applyFilters();
         }
 
-        function formatEventTitle(eventInfo) {
-            const tutor = eventInfo.event.extendedProps.tutor;
-            const timeSlot = eventInfo.event.extendedProps.timeSlot;
-            return `${tutor}\n${timeSlot}`;
-        }
-
         document.addEventListener("DOMContentLoaded", async function() {
             try {
                 const { events, tutors } = await loadData();
                 allEvents = events;
 
-                // Populate filter dropdowns
                 populateFilters(tutors);
-
-                // Create tutor legend
                 createTutorLegend(tutors);
 
-                // Initialize FullCalendar
                 const calendarEl = document.getElementById("calendar");
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek',
@@ -967,21 +944,17 @@ L", color: "#F50CD6" },
                     height: 'auto',
                     events: events,
                     eventDidMount: function(info) {
-                        // Apply custom styling
                         const tutor = info.event.extendedProps.tutor;
                         info.el.setAttribute('data-tutor', tutor);
                         
-                        // Add hover tooltip with subjects
                         const subjects = tutorData[tutor] ? tutorData[tutor].subjects.join(', ') : 'No subjects listed';
                         info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}\nSubjects: ${subjects}`);
                         
-                        // Add animation class
                         setTimeout(() => {
                             info.el.classList.add('new-event');
                         }, Math.random() * 500);
                     },
                     eventClick: function(info) {
-                        // Handle event click - could open booking modal
                         const subjects = info.event.extendedProps.subjects.join(', ') || 'No subjects listed';
                         alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}\nSubjects: ${subjects}`);
                     },
@@ -996,12 +969,10 @@ L", color: "#F50CD6" },
 
                 calendar.render();
 
-                // Add filter event listeners
                 document.getElementById("tutorFilter").addEventListener("change", applyFilters);
                 document.getElementById("subjectFilter").addEventListener("change", applyFilters);
                 document.getElementById("clearFilters").addEventListener("click", clearAllFilters);
 
-                // Handle responsive view changes
                 function handleResize() {
                     if (window.innerWidth < 768) {
                         calendar.changeView('listWeek');
@@ -1011,7 +982,6 @@ L", color: "#F50CD6" },
                 }
 
                 window.addEventListener('resize', handleResize);
-
                 console.log('Calendar initialized successfully');
 
             } catch (error) {
@@ -1020,10 +990,9 @@ L", color: "#F50CD6" },
             }
         });
 
-        // Add some interactive features
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (calendar) {
-                // Navigation shortcuts
                 if (e.key === 'ArrowLeft' && e.ctrlKey) {
                     e.preventDefault();
                     calendar.prev();
@@ -1040,10 +1009,114 @@ L", color: "#F50CD6" },
             }
         });
 
-        // Add smooth scrolling for better UX
         document.documentElement.style.scrollBehavior = 'smooth';
 
-        // Initialize theme based on system preference
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('dark-theme');
         }
+    </script>
+</body>
+</html>log('Google Sheets failed, using sample data:', sheetsError);
+                    throw sheetsError;
+                }
+                
+            } catch (error) {
+                // Fallback to sample data
+                console.log('Using sample employee data');
+                
+                const mockEmployees = [
+                    { name: "Dr. Sarah Johnson", subjects: "Mathematics, Calculus, Statistics, Physics", color: "#FF6B6B" },
+                    { name: "Prof. Michael Chen", subjects: "Computer Science, Programming, Data Structures, Algorithms", color: "#4ECDC4" },
+                    { name: "Ms. Emily Rodriguez", subjects: "English, Literature, Writing, Grammar", color: "#45B7D1" },
+                    { name: "Dr. David Smith", subjects: "Chemistry, Biology, Organic Chemistry, Biochemistry", color: "#96CEB4" },
+                    { name: "Mrs. Lisa Wang", subjects: "History, Social Studies, Geography, Political Science", color: "#FFEAA7" },
+                    { name: "Mr. James Brown", subjects: "Spanish, French, Italian, Language Arts", color: "#DDA0DD" },
+                    { name: "Dr. Amanda Taylor", subjects: "Psychology, Sociology, Philosophy, Ethics", color: "#98D8C8" },
+                    { name: "Prof. Robert Wilson", subjects: "Economics, Business, Accounting, Finance", color: "#F7DC6F" }
+                ];
+
+                mockEmployees.forEach(employee => {
+                    const tutorName = employee.name;
+                    const subjects = employee.subjects.split(',').map(s => s.trim());
+                    const color = employee.color;
+
+                    tutorData[tutorName] = {
+                        subjects: subjects,
+                        color: color
+                    };
+
+                    subjects.forEach(subject => {
+                        allSubjects.add(subject);
+                        if (!subjectToTutors[subject]) {
+                            subjectToTutors[subject] = [];
+                        }
+                        subjectToTutors[subject].push(tutorName);
+                    });
+                });
+
+                return false; // Indicates we're using fallback data
+            }
+        }
+
+        async function loadAvailabilityData() {
+            try {
+                console.log('Loading availability data...');
+                
+                // Try to load from Google Sheets first
+                try {
+                    const availabilityUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${AVAILABILITY_GID}`;
+                    const text = await fetchWithCORS(availabilityUrl);
+                    
+                    const rows = text.split("\n").slice(1);
+                    let events = [];
+                    let tutors = new Set();
+
+                    rows.forEach((row) => {
+                        if (!row.trim()) return;
+                        
+                        const cols = parseCSVRow(row);
+                        if (cols.length < 3) return;
+
+                        const tutor = cols[0].replace(/"/g, '').trim();
+                        const date = cols[1].replace(/"/g, '').trim();
+                        const slots = cols[2].replace(/"/g, '').trim();
+
+                        if (!tutor || !date) return;
+
+                        tutors.add(tutor);
+
+                        if (slots && slots !== "Busy all day" && slots !== "") {
+                            const timeSlots = slots.split(",");
+                            
+                            timeSlots.forEach(slot => {
+                                const timeRange = slot.trim();
+                                if (timeRange.includes("-")) {
+                                    const [startTime, endTime] = timeRange.split("-").map(t => t.trim());
+                                    
+                                    if (startTime && endTime) {
+                                        events.push({
+                                            title: `${tutor} - Available`,
+                                            start: `${date}T${startTime}`,
+                                            end: `${date}T${endTime}`,
+                                            extendedProps: { 
+                                                tutor: tutor,
+                                                timeSlot: timeRange,
+                                                originalSlots: slots,
+                                                subjects: tutorData[tutor] ? tutorData[tutor].subjects : []
+                                            },
+                                            backgroundColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
+                                            borderColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
+                                            className: 'tutor-event',
+                                            display: 'block'
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    console.log(`Loaded ${events.length} events from Google Sheets`);
+                    return { events, tutors: Array.from(tutors), fromSheets: true };
+                    
+                } catch (sheetsError) {
+                    console.
