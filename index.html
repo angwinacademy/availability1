@@ -103,9 +103,16 @@
             opacity: 1;
         }
 
-        .filter-group {
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
             position: relative;
             z-index: 1;
+        }
+
+        .filter-group {
+            position: relative;
         }
 
         .filter-group label {
@@ -278,36 +285,6 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
 
-        /* Default tutor event styling */
-        .fc-event {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        /* Different colors for different tutors */
-        .fc-event[data-tutor*="Tabatha"] {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        }
-
-        .fc-event[data-tutor*="Jennifer"] {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-        }
-
-        .fc-event[data-tutor*="Michael"] {
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-        }
-
-        .fc-event[data-tutor*="Lisa"] {
-            background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%);
-        }
-
-        .fc-event[data-tutor*="David"] {
-            background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
-        }
-
-        .fc-event[data-tutor*="Sarah"] {
-            background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
-        }
-
         /* Time Grid Styling */
         .fc .fc-timegrid-axis {
             background: rgba(248, 250, 252, 0.9);
@@ -444,6 +421,11 @@
                 padding: 20px;
             }
             
+            .filters-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
             .filter-group select {
                 max-width: 100%;
             }
@@ -543,6 +525,24 @@
         .fc-event.new-event {
             animation: eventFadeIn 0.5s ease-out;
         }
+
+        /* Clear filters button */
+        .clear-filters {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .clear-filters:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -558,12 +558,23 @@
 
         <!-- Filters -->
         <div class="filters-container">
-            <div class="filter-group">
-                <label for="tutorFilter">🎓 Filter by Tutor:</label>
-                <select id="tutorFilter">
-                    <option value="all">All Tutors</option>
-                </select>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="tutorFilter">🎓 Filter by Tutor:</label>
+                    <select id="tutorFilter">
+                        <option value="all">All Tutors</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="subjectFilter">📚 Filter by Subject:</label>
+                    <select id="subjectFilter">
+                        <option value="all">All Subjects</option>
+                    </select>
+                </div>
             </div>
+            
+            <button id="clearFilters" class="clear-filters">🔄 Clear All Filters</button>
         </div>
 
         <!-- Calendar -->
@@ -587,25 +598,14 @@
 
     <script>
         // Configuration
-        const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
+        const availabilityCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
+        const employeeCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=0&single=true&output=csv"; // You'll need to update this with your actual employee sheet URL
         
         let calendar;
         let allEvents = [];
-        let tutorColors = {};
-        
-        // Predefined color schemes for tutors
-        const colorSchemes = [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-            'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
-            'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)',
-            'linear-gradient(135deg, #d69e2e 0%, #b7791f 100%)',
-            'linear-gradient(135deg, #805ad5 0%, #6b46c1 100%)',
-            'linear-gradient(135deg, #38b2ac 0%, #319795 100%)',
-            'linear-gradient(135deg, #3182ce 0%, #2c5282 100%)',
-            'linear-gradient(135deg, #e53e3e 0%, #9b2c2c 100%)',
-            'linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)'
-        ];
+        let tutorData = {};
+        let subjectToTutors = {};
+        let allSubjects = new Set();
 
         function updateConnectionStatus(status, message) {
             const statusDiv = document.getElementById('connectionStatus');
@@ -685,25 +685,82 @@
             return result;
         }
 
-        async function loadData() {
+        async function loadEmployeeData() {
             try {
-                updateConnectionStatus('loading');
-                showLoading();
+                console.log('Loading employee data for subjects and colors...');
+                // For demo purposes, using mock data. Replace with your actual CSV URL
+                
+                // Mock employee data based on your CSV structure
+                const mockEmployees = [
+                    { name: "Haley Allen", subjects: "Algebra, Algebra 2, Chemistry, Geometry, Science, Trigonometry", color: "#49B98F" },
+                    { name: "Michael Angwin", subjects: "Math, Reading, Algebra, Algebra 2, Educational Consultant, Elementary, Geometry, Interventionist, Middle School, Trigonometry, Homeschool Support, Reading Specialist-Orton Gillingham", color: "#141ACC" },
+                    { name: "Rachelle Angwin", subjects: "Elementary, Reading, Academic Support", color: "#659FEB" },
+                    { name: "Lydia Cruz Belliveau", subjects: "Elementary, Math, Reading", color: "#321A5F" },
+                    { name: "James Bowman", subjects: "Algebra, Calculus, Geometry, Algebra 2, PreCalculus, ACT Math Prep, SAT Math Prep", color: "#C2183F" },
+                    { name: "Tabatha Brabham-Johnson", subjects: "Elementary, English, Reading Specialist-Orton Gillingham, Special Ed teacher, Writing", color: "#4C1A52" },
+                    { name: "Cindy Bramble", subjects: "Elementary, Generalizd, Homeschool Support, Math, Reading, Spelling, Special Ed teacher", color: "#FFAF03" },
+                    { name: "William Capehart", subjects: "Reading Specialist-Orton Gillingham, Interventionist", color: "#FF7300" },
+                    { name: "Lexie Carnaggio", subjects: "Algebra, Algebra 2, Biology, Chemistry, Geometry, Homeschool Support", color: "#A3146A" },
+                    { name: "Betsy Chandler", subjects: "Homeschool Support, English, Writing, Elementary", color: "#409813" },
+                    { name: "Nehemiah Cionelo", subjects: "Algebra, Algebra 2, Algebra 3, Calculus, History, Math, Physics, Pre Algebra, Science, PreCalculus, Geometry, ACT ELA Prep, ACT Math Prep, SAT ELA prep, SAT Math Prep, Chemistry", color: "#760585" },
+                    { name: "Kim DiDomenico", subjects: "Spanish, Spanish 1, 2, 3, AP Spanish, ESL", color: "#F50CD6" },
+                    { name: "Laura Lynn Florio", subjects: "English, Writing, History, Math, Reading, Social Studies, American Lit, AP Euro, AP Government, AP Human Geography, ASVAB, Homeschool Support, Italian, Psychology, Economics (Micro, Macro, AP), AP Politics, Government (AP, Honors), Public Speaking, AP Language, ACT ELA Prep, SAT ELA prep", color: "#07EBE3" },
+                    { name: "Michelle Glenn", subjects: "English, Science, Biology, Psychology, Homeschool Support", color: "#1876F2" },
+                    { name: "Thomas Glenn", subjects: "Educational Consultant", color: "#2D1F38" },
+                    { name: "Sally Goodson", subjects: "Algebra, Algebra 2, Algebra 3, Geometry, Pre Algebra, PreCalculus", color: "#22ACA0" },
+                    { name: "Taylor Hagerud", subjects: "Algebra, Algebra 2, Algebra 3, Calculus, College Math, Geometry, Pre Algebra, PreCalculus, Prob and Stats, AP Calculus, SAT Math Prep, ACT Math Prep, Academic Support, ACT/SAT prep, Career, College Planning, GED, Math, Praxis Exam, PSAT, Statistics, TEAS-Nursing Test, Trigonometry", color: "#700BBD" },
+                    { name: "Michelle Harrison", subjects: "Homeschool Support, Middle School, Science, Elementary, Reading, Math, English", color: "#D4DCB1" },
+                    { name: "Julie Hendriks", subjects: "Elementary, Math, Reading, Writing, Homeschool Support", color: "#80D359" },
+                    { name: "Alex Prescott", subjects: "English, Academic Support, Middle School, Writing, American Lit, AP Government, ACT ELA Prep, SAT ELA prep", color: "#F2E318" },
+                    { name: "DJ Thorne", subjects: "Math, Algebra, Elementary, Middle School, Pre Algebra", color: "#5A73A1" },
+                    { name: "Cristina Vagni", subjects: "Spanish, French, Italian, Reading, Reading Specialist-Orton Gillingham", color: "#11BD5E" }
+                ];
 
+                // Process employee data
+                mockEmployees.forEach(employee => {
+                    const tutorName = employee.name;
+                    const subjects = employee.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                    const color = employee.color;
+
+                    tutorData[tutorName] = {
+                        subjects: subjects,
+                        color: color
+                    };
+
+                    // Build subject to tutors mapping
+                    subjects.forEach(subject => {
+                        allSubjects.add(subject);
+                        if (!subjectToTutors[subject]) {
+                            subjectToTutors[subject] = [];
+                        }
+                        subjectToTutors[subject].push(tutorName);
+                    });
+                });
+
+                console.log(`Loaded data for ${Object.keys(tutorData).length} tutors with ${allSubjects.size} unique subjects`);
+                return true;
+
+            } catch (error) {
+                console.error('Error loading employee data:', error);
+                return false;
+            }
+        }
+
+        async function loadAvailabilityData() {
+            try {
                 console.log('Fetching tutor availability data...');
-                const response = await fetch(sheetCSV);
+                const response = await fetch(availabilityCSV);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const text = await response.text();
-                console.log('CSV data loaded successfully');
+                console.log('Availability CSV data loaded successfully');
 
                 const rows = text.split("\n").slice(1); // skip header
                 let events = [];
                 let tutors = new Set();
-                let colorIndex = 0;
 
                 rows.forEach((row, index) => {
                     if (!row.trim()) return; // Skip empty rows
@@ -718,12 +775,6 @@
                     if (!tutor || !date) return;
 
                     tutors.add(tutor);
-                    
-                    // Assign color to tutor if not already assigned
-                    if (!tutorColors[tutor]) {
-                        tutorColors[tutor] = colorSchemes[colorIndex % colorSchemes.length];
-                        colorIndex++;
-                    }
 
                     if (slots && slots !== "Busy all day" && slots !== "") {
                         // Split by comma to get individual time slots
@@ -743,10 +794,11 @@
                                         extendedProps: { 
                                             tutor: tutor,
                                             timeSlot: timeRange,
-                                            originalSlots: slots
+                                            originalSlots: slots,
+                                            subjects: tutorData[tutor] ? tutorData[tutor].subjects : []
                                         },
-                                        backgroundColor: 'transparent',
-                                        borderColor: 'transparent',
+                                        backgroundColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
+                                        borderColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
                                         className: 'tutor-event',
                                         display: 'block'
                                     });
@@ -759,18 +811,63 @@
                 });
 
                 console.log(`Loaded ${events.length} individual time slots for ${tutors.size} tutors`);
-                updateConnectionStatus('connected');
                 
                 return { events, tutors: Array.from(tutors) };
                 
             } catch (error) {
                 console.error('Error loading tutor availability data:', error);
+                throw error;
+            }
+        }
+
+        async function loadData() {
+            try {
+                updateConnectionStatus('loading');
+                showLoading();
+
+                // Load employee data first to get subjects and colors
+                await loadEmployeeData();
+                
+                // Then load availability data
+                const { events, tutors } = await loadAvailabilityData();
+                
+                updateConnectionStatus('connected');
+                return { events, tutors };
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
                 updateConnectionStatus('error');
                 showError(error.message);
                 throw error;
             } finally {
                 hideLoading();
             }
+        }
+
+        function populateFilters(tutors) {
+            // Populate tutor filter
+            const tutorFilter = document.getElementById("tutorFilter");
+            tutorFilter.innerHTML = '<option value="all">All Tutors</option>';
+            
+            tutors.forEach(tutor => {
+                const option = document.createElement("option");
+                option.value = tutor;
+                option.textContent = tutor;
+                tutorFilter.appendChild(option);
+            });
+
+            // Populate subject filter
+            const subjectFilter = document.getElementById("subjectFilter");
+            subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
+            
+            // Sort subjects alphabetically
+            const sortedSubjects = Array.from(allSubjects).sort();
+            sortedSubjects.forEach(subject => {
+                const option = document.createElement("option");
+                option.value = subject;
+                option.textContent = subject;
+                subjectFilter.appendChild(option);
+            });
         }
 
         function createTutorLegend(tutors) {
@@ -780,13 +877,18 @@
             tutors.forEach(tutor => {
                 const legendItem = document.createElement('div');
                 legendItem.className = 'legend-item';
+                legendItem.setAttribute('data-tutor', tutor);
                 
                 const colorBox = document.createElement('div');
                 colorBox.className = 'legend-color';
-                colorBox.style.background = tutorColors[tutor] || colorSchemes[0];
+                colorBox.style.backgroundColor = tutorData[tutor] ? tutorData[tutor].color : '#667eea';
                 
                 const label = document.createElement('span');
                 label.textContent = tutor;
+                
+                // Add subjects as tooltip
+                const subjects = tutorData[tutor] ? tutorData[tutor].subjects.join(', ') : 'No subjects listed';
+                legendItem.setAttribute('title', `Subjects: ${subjects}`);
                 
                 legendItem.appendChild(colorBox);
                 legendItem.appendChild(label);
@@ -794,22 +896,64 @@
             });
         }
 
-        function applyTutorColors() {
-            // Apply colors to events using CSS
-            const style = document.createElement('style');
-            let css = '';
+        function applyFilters() {
+            const selectedTutor = document.getElementById("tutorFilter").value;
+            const selectedSubject = document.getElementById("subjectFilter").value;
             
-            Object.entries(tutorColors).forEach(([tutor, color]) => {
-                css += `
-                    .fc-event[data-tutor*="${tutor}"] {
-                        background: ${color} !important;
-                        border: none !important;
+            let visibleTutors = new Set();
+
+            calendar.getEvents().forEach(event => {
+                const eventTutor = event.extendedProps.tutor;
+                const eventSubjects = event.extendedProps.subjects || [];
+                
+                let showEvent = true;
+
+                // Apply tutor filter
+                if (selectedTutor !== "all" && eventTutor !== selectedTutor) {
+                    showEvent = false;
+                }
+
+                // Apply subject filter
+                if (selectedSubject !== "all") {
+                    const tutorHasSubject = eventSubjects.some(subject => 
+                        subject.toLowerCase().includes(selectedSubject.toLowerCase()) ||
+                        selectedSubject.toLowerCase().includes(subject.toLowerCase())
+                    );
+                    if (!tutorHasSubject) {
+                        showEvent = false;
                     }
-                `;
+                }
+
+                if (showEvent) {
+                    event.setProp('display', 'auto');
+                    visibleTutors.add(eventTutor);
+                } else {
+                    event.setProp('display', 'none');
+                }
             });
             
-            style.textContent = css;
-            document.head.appendChild(style);
+            // Update legend visibility
+            const legendItems = document.querySelectorAll('.legend-item');
+            legendItems.forEach(item => {
+                const tutorName = item.querySelector('span').textContent;
+                if (visibleTutors.has(tutorName)) {
+                    item.style.opacity = '1';
+                    item.style.transform = 'scale(1)';
+                } else {
+                    item.style.opacity = '0.3';
+                    item.style.transform = 'scale(0.95)';
+                }
+            });
+
+            // Update status
+            const statusText = `Showing ${visibleTutors.size} tutors${selectedSubject !== 'all' ? ` for ${selectedSubject}` : ''}`;
+            console.log(statusText);
+        }
+
+        function clearAllFilters() {
+            document.getElementById("tutorFilter").value = "all";
+            document.getElementById("subjectFilter").value = "all";
+            applyFilters();
         }
 
         function formatEventTitle(eventInfo) {
@@ -823,18 +967,11 @@
                 const { events, tutors } = await loadData();
                 allEvents = events;
 
-                // Populate tutor filter dropdown
-                const tutorFilter = document.getElementById("tutorFilter");
-                tutors.forEach(tutor => {
-                    const option = document.createElement("option");
-                    option.value = tutor;
-                    option.textContent = tutor;
-                    tutorFilter.appendChild(option);
-                });
+                // Populate filter dropdowns
+                populateFilters(tutors);
 
                 // Create tutor legend
                 createTutorLegend(tutors);
-                applyTutorColors();
 
                 // Initialize FullCalendar
                 const calendarEl = document.getElementById("calendar");
@@ -852,8 +989,9 @@
                         const tutor = info.event.extendedProps.tutor;
                         info.el.setAttribute('data-tutor', tutor);
                         
-                        // Add hover tooltip
-                        info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+                        // Add hover tooltip with subjects
+                        const subjects = tutorData[tutor] ? tutorData[tutor].subjects.join(', ') : 'No subjects listed';
+                        info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}\nSubjects: ${subjects}`);
                         
                         // Add animation class
                         setTimeout(() => {
@@ -862,7 +1000,8 @@
                     },
                     eventClick: function(info) {
                         // Handle event click - could open booking modal
-                        alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+                        const subjects = info.event.extendedProps.subjects.join(', ') || 'No subjects listed';
+                        alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}\nSubjects: ${subjects}`);
                     },
                     loading: function(isLoading) {
                         if (isLoading) {
@@ -875,29 +1014,10 @@
 
                 calendar.render();
 
-                // Filter by tutor dropdown functionality
-                tutorFilter.addEventListener("change", function() {
-                    const selectedTutor = this.value;
-                    
-                    calendar.getEvents().forEach(event => {
-                        if (selectedTutor === "all" || event.extendedProps.tutor === selectedTutor) {
-                            event.setProp('display', 'auto');
-                        } else {
-                            event.setProp('display', 'none');
-                        }
-                    });
-                    
-                    // Update legend visibility
-                    const legendItems = document.querySelectorAll('.legend-item');
-                    legendItems.forEach(item => {
-                        const tutorName = item.querySelector('span').textContent;
-                        if (selectedTutor === "all" || tutorName === selectedTutor) {
-                            item.style.opacity = '1';
-                        } else {
-                            item.style.opacity = '0.3';
-                        }
-                    });
-                });
+                // Add filter event listeners
+                document.getElementById("tutorFilter").addEventListener("change", applyFilters);
+                document.getElementById("subjectFilter").addEventListener("change", applyFilters);
+                document.getElementById("clearFilters").addEventListener("click", clearAllFilters);
 
                 // Handle responsive view changes
                 function handleResize() {
@@ -931,6 +1051,9 @@
                 } else if (e.key === 'Home' && e.ctrlKey) {
                     e.preventDefault();
                     calendar.today();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    clearAllFilters();
                 }
             }
         });
@@ -942,6 +1065,3 @@
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('dark-theme');
         }
-    </script>
-</body>
-</html>
