@@ -688,60 +688,62 @@
         async function loadEmployeeData() {
             try {
                 console.log('Loading employee data for subjects and colors...');
-                // For demo purposes, using mock data. Replace with your actual CSV URL
+                const response = await fetch(employeeCSV);
                 
-                // Mock employee data based on your CSV structure
-                const mockEmployees = [
-                    { name: "Haley Allen", subjects: "Algebra, Algebra 2, Chemistry, Geometry, Science, Trigonometry", color: "#49B98F" },
-                    { name: "Michael Angwin", subjects: "Math, Reading, Algebra, Algebra 2, Educational Consultant, Elementary, Geometry, Interventionist, Middle School, Trigonometry, Homeschool Support, Reading Specialist-Orton Gillingham", color: "#141ACC" },
-                    { name: "Rachelle Angwin", subjects: "Elementary, Reading, Academic Support", color: "#659FEB" },
-                    { name: "Lydia Cruz Belliveau", subjects: "Elementary, Math, Reading", color: "#321A5F" },
-                    { name: "James Bowman", subjects: "Algebra, Calculus, Geometry, Algebra 2, PreCalculus, ACT Math Prep, SAT Math Prep", color: "#C2183F" },
-                    { name: "Tabatha Brabham-Johnson", subjects: "Elementary, English, Reading Specialist-Orton Gillingham, Special Ed teacher, Writing", color: "#4C1A52" },
-                    { name: "Cindy Bramble", subjects: "Elementary, Generalizd, Homeschool Support, Math, Reading, Spelling, Special Ed teacher", color: "#FFAF03" },
-                    { name: "William Capehart", subjects: "Reading Specialist-Orton Gillingham, Interventionist", color: "#FF7300" },
-                    { name: "Lexie Carnaggio", subjects: "Algebra, Algebra 2, Biology, Chemistry, Geometry, Homeschool Support", color: "#A3146A" },
-                    { name: "Betsy Chandler", subjects: "Homeschool Support, English, Writing, Elementary", color: "#409813" },
-                    { name: "Nehemiah Cionelo", subjects: "Algebra, Algebra 2, Algebra 3, Calculus, History, Math, Physics, Pre Algebra, Science, PreCalculus, Geometry, ACT ELA Prep, ACT Math Prep, SAT ELA prep, SAT Math Prep, Chemistry", color: "#760585" },
-                    { name: "Kim DiDomenico", subjects: "Spanish, Spanish 1, 2, 3, AP Spanish, ESL", color: "#F50CD6" },
-                    { name: "Laura Lynn Florio", subjects: "English, Writing, History, Math, Reading, Social Studies, American Lit, AP Euro, AP Government, AP Human Geography, ASVAB, Homeschool Support, Italian, Psychology, Economics (Micro, Macro, AP), AP Politics, Government (AP, Honors), Public Speaking, AP Language, ACT ELA Prep, SAT ELA prep", color: "#07EBE3" },
-                    { name: "Michelle Glenn", subjects: "English, Science, Biology, Psychology, Homeschool Support", color: "#1876F2" },
-                    { name: "Thomas Glenn", subjects: "Educational Consultant", color: "#2D1F38" },
-                    { name: "Sally Goodson", subjects: "Algebra, Algebra 2, Algebra 3, Geometry, Pre Algebra, PreCalculus", color: "#22ACA0" },
-                    { name: "Taylor Hagerud", subjects: "Algebra, Algebra 2, Algebra 3, Calculus, College Math, Geometry, Pre Algebra, PreCalculus, Prob and Stats, AP Calculus, SAT Math Prep, ACT Math Prep, Academic Support, ACT/SAT prep, Career, College Planning, GED, Math, Praxis Exam, PSAT, Statistics, TEAS-Nursing Test, Trigonometry", color: "#700BBD" },
-                    { name: "Michelle Harrison", subjects: "Homeschool Support, Middle School, Science, Elementary, Reading, Math, English", color: "#D4DCB1" },
-                    { name: "Julie Hendriks", subjects: "Elementary, Math, Reading, Writing, Homeschool Support", color: "#80D359" },
-                    { name: "Alex Prescott", subjects: "English, Academic Support, Middle School, Writing, American Lit, AP Government, ACT ELA Prep, SAT ELA prep", color: "#F2E318" },
-                    { name: "DJ Thorne", subjects: "Math, Algebra, Elementary, Middle School, Pre Algebra", color: "#5A73A1" },
-                    { name: "Cristina Vagni", subjects: "Spanish, French, Italian, Reading, Reading Specialist-Orton Gillingham", color: "#11BD5E" }
-                ];
-
-                // Process employee data
-                mockEmployees.forEach(employee => {
-                    const tutorName = employee.name;
-                    const subjects = employee.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                    const color = employee.color;
-
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                console.log('Employee CSV data loaded successfully');
+        
+                const rows = text.split("\n").slice(1); // skip header row
+                
+                rows.forEach((row, index) => {
+                    if (!row.trim()) return; // Skip empty rows
+                    
+                    const cols = parseCSVRow(row);
+                    if (cols.length < 21) return; // Make sure we have enough columns
+                    
+                    // Based on your CSV structure:
+                    // Column 2: First Name, Column 3: Last Name, Column 19: Subjects, Column 20: Calendar Color
+                    const firstName = cols[2] ? cols[2].trim() : '';
+                    const lastName = cols[3] ? cols[3].trim() : '';
+                    const subjects = cols[19] ? cols[19].trim() : '';
+                    const color = cols[20] ? cols[20].trim() : '#667eea';
+                    
+                    if (!firstName || !lastName) return;
+                    
+                    // Create full name (matching your availability CSV format)
+                    const tutorName = `${firstName} ${lastName}`.trim();
+                    
+                    // Parse subjects (comma-separated)
+                    const subjectList = subjects ? subjects.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+                    
                     tutorData[tutorName] = {
-                        subjects: subjects,
-                        color: color
+                        subjects: subjectList,
+                        color: color.startsWith('#') ? color : '#667eea' // Ensure valid hex color
                     };
-
+        
                     // Build subject to tutors mapping
-                    subjects.forEach(subject => {
+                    subjectList.forEach(subject => {
                         allSubjects.add(subject);
                         if (!subjectToTutors[subject]) {
                             subjectToTutors[subject] = [];
                         }
                         subjectToTutors[subject].push(tutorName);
                     });
+                    
+                    console.log(`Loaded: ${tutorName} - ${subjectList.length} subjects - ${color}`);
                 });
-
+        
                 console.log(`Loaded data for ${Object.keys(tutorData).length} tutors with ${allSubjects.size} unique subjects`);
                 return true;
-
+        
             } catch (error) {
                 console.error('Error loading employee data:', error);
+                console.log('Falling back to mock data...');
+                // You can keep the mock data as fallback if needed
                 return false;
             }
         }
