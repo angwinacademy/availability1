@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tutor Availability Calendar</title>
-    <link href="https://unpkg.com/@fullcalendar/core@6.1.11/main.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/@fullcalendar/daygrid@6.1.11/main.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/@fullcalendar/timegrid@6.1.11/main.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/@fullcalendar/core@6.1.11/main.min.js"></script>
-    <script src="https://unpkg.com/@fullcalendar/interaction@6.1.11/main.min.js"></script>
-    <script src="https://unpkg.com/@fullcalendar/daygrid@6.1.11/main.min.js"></script>
-    <script src="https://unpkg.com/@fullcalendar/timegrid@6.1.11/main.min.js"></script>
-    <script src="https://unpkg.com/@fullcalendar/list@6.1.11/main.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -606,7 +599,7 @@
     <script>
         // Configuration
         const availabilityCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
-        const employeeCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vStfM_AuGTHtcz1JzK9zV5JwdFYe9fdtwyAwTt59uK6wbuIjhwHBndHsfXVoq_L8cJ27DFow0RKLSIn/pub?gid=1392008086&single=true&output=csv"; // You'll need to update this with your actual employee sheet URL
+        const employeeCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=0&single=true&output=csv"; // You'll need to update this with your actual employee sheet URL
         
         let calendar;
         let allEvents = [];
@@ -692,65 +685,45 @@
             return result;
         }
 
-        async function loadEmployeeData() {
-            try {
-                console.log('Loading employee data for subjects and colors...');
-                const response = await fetch(employeeCSV);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const text = await response.text();
-                console.log('Employee CSV data loaded successfully');
-        
-                const rows = text.split("\n").slice(1); // skip header row
-                
-                rows.forEach((row, index) => {
-                    if (!row.trim()) return; // Skip empty rows
-                    
-                    const cols = parseCSVRow(row);
-                    if (cols.length < 21) return; // Make sure we have enough columns
-                    
-                    // Based on your CSV structure:
-                    // Column 2: First Name, Column 3: Last Name, Column 19: Subjects, Column 20: Calendar Color
-                    const firstName = cols[2] ? cols[2].trim() : '';
-                    const lastName = cols[3] ? cols[3].trim() : '';
-                    const subjects = cols[19] ? cols[19].trim() : '';
-                    const color = cols[20] ? cols[20].trim() : '#667eea';
-                    
-                    if (!firstName || !lastName) return;
-                    
-                    // Create full name (matching your availability CSV format)
-                    const tutorName = `${firstName} ${lastName}`.trim();
-                    
-                    // Parse subjects (comma-separated)
-                    const subjectList = subjects ? subjects.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
-                    
+L", color: "#F50CD6" },
+                    { name: "Laura Lynn Florio", subjects: "English, Writing, History, Math, Reading, Social Studies, American Lit, AP Euro, AP Government, AP Human Geography, ASVAB, Homeschool Support, Italian, Psychology, Economics (Micro, Macro, AP), AP Politics, Government (AP, Honors), Public Speaking, AP Language, ACT ELA Prep, SAT ELA prep", color: "#07EBE3" },
+                    { name: "Michelle Glenn", subjects: "English, Science, Biology, Psychology, Homeschool Support", color: "#1876F2" },
+                    { name: "Thomas Glenn", subjects: "Educational Consultant", color: "#2D1F38" },
+                    { name: "Sally Goodson", subjects: "Algebra, Algebra 2, Algebra 3, Geometry, Pre Algebra, PreCalculus", color: "#22ACA0" },
+                    { name: "Taylor Hagerud", subjects: "Algebra, Algebra 2, Algebra 3, Calculus, College Math, Geometry, Pre Algebra, PreCalculus, Prob and Stats, AP Calculus, SAT Math Prep, ACT Math Prep, Academic Support, ACT/SAT prep, Career, College Planning, GED, Math, Praxis Exam, PSAT, Statistics, TEAS-Nursing Test, Trigonometry", color: "#700BBD" },
+                    { name: "Michelle Harrison", subjects: "Homeschool Support, Middle School, Science, Elementary, Reading, Math, English", color: "#D4DCB1" },
+                    { name: "Julie Hendriks", subjects: "Elementary, Math, Reading, Writing, Homeschool Support", color: "#80D359" },
+                    { name: "Alex Prescott", subjects: "English, Academic Support, Middle School, Writing, American Lit, AP Government, ACT ELA Prep, SAT ELA prep", color: "#F2E318" },
+                    { name: "DJ Thorne", subjects: "Math, Algebra, Elementary, Middle School, Pre Algebra", color: "#5A73A1" },
+                    { name: "Cristina Vagni", subjects: "Spanish, French, Italian, Reading, Reading Specialist-Orton Gillingham", color: "#11BD5E" }
+                ];
+
+                // Process employee data
+                mockEmployees.forEach(employee => {
+                    const tutorName = employee.name;
+                    const subjects = employee.subjects.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                    const color = employee.color;
+
                     tutorData[tutorName] = {
-                        subjects: subjectList,
-                        color: color.startsWith('#') ? color : '#667eea' // Ensure valid hex color
+                        subjects: subjects,
+                        color: color
                     };
-        
+
                     // Build subject to tutors mapping
-                    subjectList.forEach(subject => {
+                    subjects.forEach(subject => {
                         allSubjects.add(subject);
                         if (!subjectToTutors[subject]) {
                             subjectToTutors[subject] = [];
                         }
                         subjectToTutors[subject].push(tutorName);
                     });
-                    
-                    console.log(`Loaded: ${tutorName} - ${subjectList.length} subjects - ${color}`);
                 });
-        
+
                 console.log(`Loaded data for ${Object.keys(tutorData).length} tutors with ${allSubjects.size} unique subjects`);
                 return true;
-        
+
             } catch (error) {
                 console.error('Error loading employee data:', error);
-                console.log('Falling back to mock data...');
-                // You can keep the mock data as fallback if needed
                 return false;
             }
         }
