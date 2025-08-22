@@ -373,14 +373,6 @@
   }
 });
 
-      // Fade legend
-      const legendItems = document.querySelectorAll('.legend-item');
-      legendItems.forEach(item=>{
-        const tutorName = item.querySelector('span').textContent;
-        const matchesTutor = (selectedTutor==='all' || tutorName===selectedTutor);
-        item.style.opacity = matchesTutor ? '1' : '0.3';
-      });
-    }
 
     async function loadAvailability(){
       const text = await fetchCSV(sheetCSV);
