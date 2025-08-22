@@ -16,7 +16,7 @@
     @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
     .header h1{color:#2d3748;font-size:2.8rem;font-weight:800;margin-bottom:15px;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .header p{color:#718096;font-size:1.1rem;font-weight:500}
-    .filters-container{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;margin-bottom:30px;box-shadow:0 15px 45px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden}
+    .filters-container{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;margin-bottom:30px;box-shadow:0 15px 45px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow: visible}
     .filters-container::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(102,126,234,.03),rgba(118,75,162,.03));opacity:1}
     .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;position:relative;z-index:1}
     .filter-group label{display:block;font-weight:700;margin-bottom:12px;color:#2d3748;font-size:1.1rem}
@@ -102,7 +102,16 @@
           <label for="tutorFilter">🎓 Filter by Tutor:</label>
           <select id="tutorFilter">
             <option value="all">All Tutors</option>
+          
           </select>
+          <div class="filter-row" style="margin-top:8px; gap:8px;">
+            <button id="toggleTutor2" class="btn" type="button" title="Compare two tutors" style="padding:8px 10px">Add second tutor</button>
+            <select id="tutorFilter2" style="display:none; min-width:200px;">
+              <option value="none">— Select second tutor —</option>
+            </select>
+            <button id="removeTutor2" class="btn" type="button" title="Remove second tutor" style="display:none;padding:6px 8px;width:34px;height:34px;line-height:1">×</button>
+          <span id="tutor2Hint" style="display:none; color:#718096; font-size:12px">Showing union of Tutor 1 and Tutor 2</span>
+        
         </div>
 
         <div class="filter-group">
@@ -310,13 +319,59 @@
     }
 
     function applyFiltersUI(){
-      const selectedTutor = document.getElementById('tutorFilter').value;
-      const subjectQuery  = document.getElementById('subjectFilter').value;
+  const tutorSelect  = document.getElementById('tutorFilter');
+  const tutorSelect2 = document.getElementById('tutorFilter2');
+  const subjectInput = document.getElementById('subjectFilter');
 
-      calendar.getEvents().forEach(evt=>{
-        const matches = eventMatchesFilters(evt, selectedTutor, subjectQuery);
-        evt.setProp('display', matches ? 'auto' : 'none');
-      });
+  const t1 = tutorSelect ? tutorSelect.value : 'all';
+  const t2Visible = tutorSelect2 && tutorSelect2.style.display !== 'none';
+  const t2 = (t2Visible && tutorSelect2.value && tutorSelect2.value !== 'none') ? tutorSelect2.value : null;
+
+  const q = (subjectInput?.value || '').trim().toLowerCase();
+  const doSubject = q.length >= 2;
+
+  let allowedTutors = null;
+  if (doSubject) {
+    allowedTutors = new Set();
+    tutorSubjectsMapLower.forEach((subjectsLower, tutorLowerName) => {
+      if (subjectsLower.includes(q)) allowedTutors.add(tutorLowerName);
+    });
+  }
+
+  calendar.batchRendering(() => {
+    const evts = calendar.getEvents();
+    for (let i=0; i<evts.length; i++) {
+      const evt = evts[i];
+      const tutor = evt.extendedProps.tutor;
+      const tutorLower = evt.extendedProps.tutorLower;
+
+      let ok = true;
+      // Tutor logic: if two tutors selected, union
+      if (t1 !== 'all' && !t2) {
+        ok = (tutor === t1);
+      } else if (t1 !== 'all' && t2) {
+        ok = (tutor === t1 || tutor === t2);
+      } // else t1 === 'all' => no restriction unless t2 present
+      else if (t1 === 'all' && t2) {
+        ok = (tutor === t2);
+      }
+
+      if (ok && doSubject) {
+        ok = allowedTutors.has(tutorLower);
+      }
+      evt.setProp('display', ok ? 'auto' : 'none');
+    }
+  });
+
+  // Legend emphasis only for primary tutor selection
+  const legendItems = document.querySelectorAll('.legend-item');
+  for (let i=0; i<legendItems.length; i++){
+    const item = legendItems[i];
+    const name = item.textContent.trim();
+    let match = (t1 === 'all' || name === t1);
+    item.style.opacity = match ? '1' : '0.35';
+  }
+});
 
       // Fade legend
       const legendItems = document.querySelectorAll('.legend-item');
@@ -469,6 +524,7 @@
         calendar.render();
 
         
+        
         // Wire up filters
         tutorFilter.addEventListener('change', applyFiltersUI);
 
@@ -476,6 +532,10 @@
         const applyBtn     = document.getElementById('applySubject');
         const clearBtn     = document.getElementById('clearSubject');
         const suggBox      = document.getElementById('subjectSuggestions');
+        const tutorFilter2 = document.getElementById('tutorFilter2');
+        const toggleTutor2 = document.getElementById('toggleTutor2');
+        const removeTutor2 = document.getElementById('removeTutor2');
+        const tutor2Hint   = document.getElementById('tutor2Hint');
 
         // Apply on Search click
         applyBtn.addEventListener('click', () => {
@@ -483,7 +543,7 @@
           hideSubjectSuggestions();
         });
 
-        // Apply on Enter; Arrow keys navigate suggestions
+        // Enter key applies
         subjectInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -499,11 +559,11 @@
             items.forEach(el => el.classList.remove('active'));
             items[idx].classList.add('active');
             items[idx].scrollIntoView({block:'nearest'});
-            subjectInput.value = items[idx].getAttribute('data-val'); // preview selection in the box
+            subjectInput.value = items[idx].getAttribute('data-val');
           }
         });
 
-        // Update suggestions on input & focus (no filtering until Search/Enter)
+        // Suggestions update (no filtering yet)
         subjectInput.addEventListener('input', (e) => {
           updateSubjectSuggestions(e.target.value);
         });
@@ -511,21 +571,53 @@
           updateSubjectSuggestions(e.target.value);
         });
 
+        // Clear: make it snappy by deferring heavy filter to idle frame
+        clearBtn.addEventListener('click', () => {
+          subjectInput.value = '';
+          hideSubjectSuggestions();
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => applyFiltersUI(), {timeout: 200});
+          } else {
+            setTimeout(() => applyFiltersUI(), 0);
+          }
+        });
+
+        // Second tutor toggle
+        toggleTutor2.addEventListener('click', () => {
+          if (tutorFilter2.style.display === 'none') {
+            tutorFilter2.style.display = 'inline-block';
+            removeTutor2.style.display = 'inline-flex';
+            tutor2Hint.style.display   = 'inline';
+            // populate tutor2 with same options as tutor1 (if not already)
+            if (tutorFilter2.options.length <= 1) {
+              for (let i=0;i<tutorFilter.options.length;i++){
+                const opt = tutorFilter.options[i].cloneNode(true);
+                tutorFilter2.appendChild(opt);
+              }
+            }
+            toggleTutor2.textContent = 'Second tutor added';
+            toggleTutor2.disabled = true;
+          }
+        });
+        removeTutor2.addEventListener('click', () => {
+          tutorFilter2.value = 'none';
+          tutorFilter2.style.display = 'none';
+          removeTutor2.style.display = 'none';
+          tutor2Hint.style.display   = 'none';
+          toggleTutor2.textContent = 'Add second tutor';
+          toggleTutor2.disabled = false;
+          applyFiltersUI();
+        });
+        tutorFilter2.addEventListener('change', applyFiltersUI);
+
         // Click outside to close suggestions
         document.addEventListener('click', (e) => {
-          if (!suggBox) return;
           const within = suggBox.contains(e.target) || e.target === subjectInput;
           if (!within) hideSubjectSuggestions();
         });
 
-        // Clear subject value
-        clearBtn.addEventListener('click', () => {
-          subjectInput.value = '';
-          applyFiltersUI();
-          hideSubjectSuggestions();
-        });
-
         // Responsive
+
 
         function handleResize(){ calendar.changeView(window.innerWidth<768 ? 'listWeek':'timeGridWeek'); }
         window.addEventListener('resize', handleResize);
