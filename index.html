@@ -83,8 +83,7 @@
         <div class="filter-group">
           <label for="subjectFilter">📘 Filter by Subject (type to search; matches “contains”):</label>
           <div class="filter-row">
-            <input id="subjectFilter" list="subjectsList" placeholder="e.g., algebra, biology, essay" autocomplete="off"/>
-            <datalist id="subjectsList"></datalist>
+            <input id="subjectFilter" placeholder="Type subject (e.g., algebra, biology, essay)" autocomplete="off"/>
             <button id="clearSubject" class="btn" title="Clear subject">Clear</button>
           </div>
           <small style="color:#718096;font-weight:600;display:block;margin-top:8px">
@@ -237,15 +236,6 @@
       }
     }
 
-    function populateSubjectsDatalist(){
-      const list = document.getElementById('subjectsList');
-      list.innerHTML = '';
-      Array.from(uniqueSubjectTokens).sort((a,b)=>a.localeCompare(b)).forEach(tok=>{
-        const opt = document.createElement('option');
-        opt.value = tok;
-        list.appendChild(opt);
-      });
-    }
 
     function createTutorLegend(tutors){
       const legendContainer = document.getElementById('tutorLegend');
@@ -359,7 +349,6 @@
       try{
         const text = await fetchCSV(subjectsCSV);
         buildSubjectsMapFromCSV(text);
-        populateSubjectsDatalist();
       }catch(err){
         console.warn('Subjects CSV failed to load:', err.message);
       }
