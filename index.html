@@ -436,6 +436,7 @@
     }
 
     
+    function debounce(fn, delay=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); }; }
     // === Subject suggestions helpers ===
     function updateSubjectSuggestions(query){
       const box = document.getElementById('subjectSuggestions');
@@ -564,9 +565,9 @@
         });
 
         // Suggestions update (no filtering yet)
-        subjectInput.addEventListener('input', (e) => {
+        subjectInput.addEventListener('input', debounce((e) => {
           updateSubjectSuggestions(e.target.value);
-        });
+        }, 150));
         subjectInput.addEventListener('focus', (e) => {
           updateSubjectSuggestions(e.target.value);
         });
@@ -612,6 +613,7 @@
 
         // Click outside to close suggestions
         document.addEventListener('click', (e) => {
+          if (!suggBox) return;
           const within = suggBox.contains(e.target) || e.target === subjectInput;
           if (!within) hideSubjectSuggestions();
         });
