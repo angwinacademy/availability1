@@ -1,1163 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutor Availability Calendar</title>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            min-height: 100vh;
-            color: #333;
-            padding: 20px;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .header h1 {
-            color: #2d3748;
-            font-size: 2.8rem;
-            font-weight: 800;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header p {
-            color: #718096;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .config-notice {
-            background: rgba(255, 246, 143, 0.95);
-            border: 2px solid rgba(255, 193, 7, 0.5);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-            font-weight: 600;
-            color: #856404;
-        }
-
-        .filters-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .filters-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
-            opacity: 1;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .filter-group {
-            position: relative;
-        }
-
-        .filter-group label {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #2d3748;
-            font-size: 1.1rem;
-        }
-
-        .filter-group select {
-            width: 100%;
-            max-width: 300px;
-            padding: 16px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
-            color: #2d3748;
-            cursor: pointer;
-        }
-
-        .filter-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .filter-group select:hover {
-            border-color: #cbd5e0;
-            transform: translateY(-1px);
-        }
-
-        .calendar-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .calendar-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
-
-        /* Custom FullCalendar Styling */
-        .fc {
-            position: relative;
-            z-index: 1;
-        }
-
-        .fc .fc-toolbar {
-            margin-bottom: 25px;
-        }
-
-        .fc .fc-toolbar-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #2d3748;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .fc .fc-button-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            padding: 8px 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .fc .fc-button-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-        }
-
-        .fc .fc-button-primary:focus {
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
-        }
-
-        .fc .fc-button-primary:disabled {
-            opacity: 0.6;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .fc .fc-button-primary.fc-button-active {
-            background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Calendar Grid Styling */
-        .fc .fc-scrollgrid {
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .fc .fc-col-header-cell {
-            background: rgba(248, 250, 252, 0.9);
-            border-color: rgba(226, 232, 240, 0.5);
-            font-weight: 700;
-            color: #4a5568;
-            padding: 15px 8px;
-        }
-
-        .fc .fc-daygrid-day,
-        .fc .fc-timegrid-slot {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: rgba(226, 232, 240, 0.3);
-            transition: background-color 0.2s ease;
-        }
-
-        .fc .fc-daygrid-day:hover,
-        .fc .fc-timegrid-slot:hover {
-            background: rgba(102, 126, 234, 0.05);
-        }
-
-        .fc .fc-day-today {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
-        }
-
-        .fc .fc-day-today .fc-daygrid-day-number {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            margin: 4px;
-        }
-
-        /* Event Styling */
-        .fc-event {
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            margin: 2px 0;
-        }
-
-        .fc-event:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-        }
-
-        /* Time Grid Styling */
-        .fc .fc-timegrid-axis {
-            background: rgba(248, 250, 252, 0.9);
-            border-color: rgba(226, 232, 240, 0.3);
-            color: #4a5568;
-            font-weight: 600;
-        }
-
-        .fc .fc-timegrid-slot-label {
-            color: #718096;
-            font-weight: 500;
-        }
-
-        /* Loading State */
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(102, 126, 234, 0.2);
-            border-left: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-left: 15px;
-            font-weight: 600;
-            color: #4a5568;
-            font-size: 1.1rem;
-        }
-
-        /* Error State */
-        .error-message {
-            background: rgba(254, 215, 215, 0.9);
-            color: #742a2a;
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid rgba(254, 178, 178, 0.5);
-            text-align: center;
-            font-weight: 600;
-            margin: 20px 0;
-        }
-
-        /* Status Indicator */
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .connection-status.connected {
-            background: rgba(198, 246, 213, 0.95);
-            color: #22543d;
-            border: 2px solid rgba(154, 230, 180, 0.5);
-        }
-
-        .connection-status.error {
-            background: rgba(254, 215, 215, 0.95);
-            color: #742a2a;
-            border: 2px solid rgba(254, 178, 178, 0.5);
-        }
-
-        .connection-status.loading {
-            background: rgba(254, 235, 200, 0.95);
-            color: #7c2d12;
-            border: 2px solid rgba(251, 211, 141, 0.5);
-        }
-
-        /* Tooltip Styling */
-        .fc-popover {
-            background: rgba(0, 0, 0, 0.9);
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .fc-popover-header {
-            background: transparent;
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 12px 16px 8px;
-        }
-
-        .fc-popover-body {
-            color: rgba(255, 255, 255, 0.9);
-            padding: 8px 16px 12px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 25px 20px;
-            }
-            
-            .header h1 {
-                font-size: 2.2rem;
-            }
-            
-            .filters-container,
-            .calendar-container {
-                padding: 20px;
-            }
-            
-            .filters-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .filter-group select {
-                max-width: 100%;
-            }
-            
-            .connection-status {
-                position: relative;
-                top: auto;
-                right: auto;
-                margin-bottom: 20px;
-                display: inline-block;
-            }
-
-            .fc .fc-toolbar {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .fc .fc-toolbar-title {
-                font-size: 1.4rem;
-                order: -1;
-            }
-
-            .fc .fc-button-group {
-                display: flex;
-                justify-content: center;
-                gap: 5px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .fc-event {
-                font-size: 0.75rem;
-                padding: 2px 4px;
-            }
-        }
-
-        /* Legend */
-        .tutor-legend {
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 2px solid rgba(226, 232, 240, 0.3);
-        }
-
-        .legend-title {
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            color: #4a5568;
-            padding: 8px 12px;
-            background: rgba(248, 250, 252, 0.5);
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .legend-item:hover {
-            background: rgba(248, 250, 252, 0.8);
-            transform: translateY(-1px);
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Animation for new events */
-        @keyframes eventFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .fc-event.new-event {
-            animation: eventFadeIn 0.5s ease-out;
-        }
-
-        /* Clear filters button */
-        .clear-filters {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-        }
-
-        .clear-filters:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.3);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tutor Availability Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#667eea 100%);background-size:400% 400%;animation:gradientShift 15s ease infinite;min-height:100vh;color:#333;padding:20px}
+    @keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .container{max-width:1200px;margin:0 auto}
+    .header{background:rgba(255,255,255,.95);border-radius:24px;padding:40px;margin-bottom:30px;box-shadow:0 20px 60px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden;text-align:center}
+    .header::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#667eea,#764ba2,#667eea);background-size:200% 100%;animation:shimmer 2s infinite}
+    @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .header h1{color:#2d3748;font-size:2.8rem;font-weight:800;margin-bottom:15px;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .header p{color:#718096;font-size:1.1rem;font-weight:500}
+    .filters-container{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;margin-bottom:30px;box-shadow:0 15px 45px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden}
+    .filters-container::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(102,126,234,.03),rgba(118,75,162,.03));opacity:1}
+    .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;position:relative;z-index:1}
+    .filter-group label{display:block;font-weight:700;margin-bottom:12px;color:#2d3748;font-size:1.1rem}
+    .filter-group select,.filter-group input{width:100%;max-width:420px;padding:16px 20px;border:2px solid #e2e8f0;border-radius:16px;font-size:16px;font-weight:600;transition:all .3s ease;background:rgba(255,255,255,.9);color:#2d3748}
+    .filter-group select:focus,.filter-group input:focus{outline:none;border-color:#667eea;background:#fff;box-shadow:0 0 0 4px rgba(102,126,234,.1);transform:translateY(-2px)}
+    .filter-row{display:flex;gap:10px;align-items:center}
+    .btn{padding:12px 16px;border-radius:12px;border:2px solid #e2e8f0;background:#fff;font-weight:700;cursor:pointer}
+    .btn:hover{border-color:#cbd5e0}
+    .calendar-container{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;box-shadow:0 15px 45px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden}
+    .calendar-container::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#667eea,#764ba2,#667eea);background-size:200% 100%;animation:shimmer 2s infinite}
+    .fc{position:relative;z-index:1}
+    .fc .fc-toolbar{margin-bottom:25px}
+    .fc .fc-toolbar-title{font-size:1.8rem;font-weight:800;color:#2d3748;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .fc .fc-button-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;border-radius:12px;font-weight:600;padding:8px 16px;transition:all .3s ease;box-shadow:0 4px 15px rgba(102,126,234,.3)}
+    .fc .fc-button-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(102,126,234,.4);background:linear-gradient(135deg,#5a67d8 0%,#6b46c1 100%)}
+    .fc .fc-scrollgrid{border-radius:16px;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,.1)}
+    .fc .fc-col-header-cell{background:rgba(248,250,252,.9);border-color:rgba(226,232,240,.5);font-weight:700;color:#4a5568;padding:15px 8px}
+    .fc .fc-daygrid-day,.fc .fc-timegrid-slot{background:rgba(255,255,255,.9);border-color:rgba(226,232,240,.3);transition:background-color .2s ease}
+    .fc .fc-daygrid-day:hover,.fc .fc-timegrid-slot:hover{background:rgba(102,126,234,.05)}
+    .fc .fc-day-today{background:linear-gradient(135deg,rgba(102,126,234,.08),rgba(118,75,162,.08))}
+    .fc .fc-day-today .fc-daygrid-day-number{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;margin:4px}
+    .fc-event{border:none;border-radius:8px;font-weight:600;font-size:.85rem;box-shadow:0 3px 12px rgba(0,0,0,.15);transition:all .3s ease;cursor:pointer;margin:2px 0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
+    .fc-event:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .loading-overlay{position:absolute;inset:0;background:rgba(255,255,255,.9);display:flex;justify-content:center;align-items:center;z-index:1000;border-radius:20px;backdrop-filter:blur(10px)}
+    .loading-spinner{width:50px;height:50px;border:4px solid rgba(102,126,234,.2);border-left:4px solid #667eea;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .loading-text{margin-left:15px;font-weight:600;color:#4a5568;font-size:1.1rem}
+    .error-message{background:rgba(254,215,215,.9);color:#742a2a;padding:20px;border-radius:12px;border:2px solid rgba(254,178,178,.5);text-align:center;font-weight:600;margin:20px 0}
+    .connection-status{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:20px;font-size:.9rem;font-weight:600;z-index:1000;transition:all .3s ease;backdrop-filter:blur(10px);box-shadow:0 8px 25px rgba(0,0,0,.15)}
+    .connection-status.connected{background:rgba(198,246,213,.95);color:#22543d;border:2px solid rgba(154,230,180,.5)}
+    .connection-status.error{background:rgba(254,215,215,.95);color:#742a2a;border:2px solid rgba(254,178,178,.5)}
+    .connection-status.loading{background:rgba(254,235,200,.95);color:#7c2d12;border:2px solid rgba(251,211,141,.5)}
+    .fc-popover{background:rgba(0,0,0,.9);border:none;border-radius:12px;box-shadow:0 15px 35px rgba(0,0,0,.3);backdrop-filter:blur(10px)}
+    .fc-popover-header{background:transparent;border:none;color:#fff;font-weight:600;padding:12px 16px 8px}
+    .fc-popover-body{color:rgba(255,255,255,.9);padding:8px 16px 12px}
+    @media (max-width:768px){body{padding:10px}.header{padding:25px 20px}.header h1{font-size:1.8rem}.filters-container,.calendar-container{padding:20px}.connection-status{position:relative;top:auto;right:auto;margin-bottom:20px;display:inline-block}.fc .fc-toolbar{flex-direction:column;gap:15px}.fc .fc-toolbar-title{font-size:1.4rem;order:-1}}
+    .tutor-legend{margin-top:25px;padding-top:25px;border-top:2px solid rgba(226,232,240,.3)}
+    .legend-title{font-weight:700;color:#2d3748;margin-bottom:15px;font-size:1.1rem}
+    .legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+    .legend-item{display:flex;align-items:center;gap:10px;font-weight:600;color:#4a5568;padding:8px 12px;background:rgba(248,250,252,.5);border-radius:8px;transition:all .2s ease}
+    .legend-item:hover{background:rgba(248,250,252,.8);transform:translateY(-1px)}
+    .legend-color{width:16px;height:16px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  </style>
 </head>
 <body>
-    <!-- Connection Status Indicator -->
-    <div id="connectionStatus" class="connection-status loading">🔄 Loading calendar...</div>
-    
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>📅 Tutor Availability Calendar</h1>
-            <p>View real-time tutor availability and schedule appointments</p>
-        </div>
+  <div id="connectionStatus" class="connection-status loading">🔄 Loading calendar...</div>
 
-        <!-- Configuration Notice -->
-        <div class="config-notice">
-            <strong>⚠️ Configuration Required</strong><br>
-            Please update your SHEET_ID and ensure your Google Sheet is publicly accessible.
-            Currently showing sample data for demonstration.
-        </div>
-
-        <!-- Filters -->
-        <div class="filters-container">
-            <div class="filters-grid">
-                <div class="filter-group">
-                    <label for="tutorFilter">🎓 Filter by Tutor:</label>
-                    <select id="tutorFilter">
-                        <option value="all">All Tutors</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="subjectFilter">📚 Filter by Subject:</label>
-                    <select id="subjectFilter">
-                        <option value="all">All Subjects</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button id="clearFilters" class="clear-filters">🔄 Clear All Filters</button>
-        </div>
-
-        <!-- Calendar -->
-        <div class="calendar-container">
-            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">Loading availability...</div>
-            </div>
-            
-            <div id="calendar"></div>
-            
-            <!-- Legend -->
-            <div class="tutor-legend">
-                <div class="legend-title">👥 Tutor Color Legend</div>
-                <div id="tutorLegend" class="legend-grid">
-                    <!-- Legend items will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>📅 Tutor Availability Calendar</h1>
+      <p>View real-time tutor availability and schedule appointments</p>
     </div>
 
-    <script>
-        // Configuration - UPDATE THESE WITH YOUR ACTUAL VALUES
-        const SHEET_ID = "1kA70FU2YGy5gTtkfFrlz2tsJ7-bDZ7Tm54gGQ0IUIUo"; // Remove the "/edit?gid=..." part
-        const AVAILABILITY_GID = "0"; // Sheet1 (Availabilities) - usually GID 0
-        const EMPLOYEE_GID = "1392008086"; // Subjects sheet GID
-        
-        let calendar;
-        let allEvents = [];
-        let tutorData = {};
-        let subjectToTutors = {};
-        let allSubjects = new Set();
+    <!-- Filters -->
+    <div class="filters-container">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label for="tutorFilter">🎓 Filter by Tutor:</label>
+          <select id="tutorFilter">
+            <option value="all">All Tutors</option>
+          </select>
+        </div>
 
-        function updateConnectionStatus(status, message) {
-            const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.className = `connection-status ${status}`;
-            
-            switch(status) {
-                case 'connected':
-                    statusDiv.innerHTML = '✅ Calendar loaded from Google Sheets';
-                    setTimeout(() => {
-                        statusDiv.style.opacity = '0.7';
-                    }, 3000);
-                    break;
-                case 'error':
-                    statusDiv.innerHTML = '⚠️ Using sample data (Google Sheets access failed)';
-                    break;
-                case 'loading':
-                    statusDiv.innerHTML = '🔄 Loading calendar...';
-                    break;
-            }
+        <div class="filter-group">
+          <label for="subjectFilter">📘 Filter by Subject (type to search; matches “contains”):</label>
+          <div class="filter-row">
+            <input id="subjectFilter" list="subjectsList" placeholder="e.g., algebra, biology, essay" autocomplete="off"/>
+            <datalist id="subjectsList"></datalist>
+            <button id="clearSubject" class="btn" title="Clear subject">Clear</button>
+          </div>
+          <small style="color:#718096;font-weight:600;display:block;margin-top:8px">
+            Suggestions come from the Subjects sheet; matching is case-insensitive “contains”.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-container">
+      <div id="loadingOverlay" class="loading-overlay" style="display:none">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading availability...</div>
+      </div>
+
+      <div id="calendar"></div>
+
+      <div class="tutor-legend">
+        <div class="legend-title">👥 Tutor Color Legend</div>
+        <div id="tutorLegend" class="legend-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === CONFIG ===
+    // Existing availability CSV (already working in your original file)
+    const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
+
+    // NEW: Subjects sheet (publish the Subjects tab as CSV and paste URL here)
+    // If you don’t have the URL yet, leave this as-is and it will only enable the UI once set.
+    let subjectsCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vStfM_AuGTHtcz1JzK9zV5JwdFYe9fdtwyAwTt59uK6wbuIjhwHBndHsfXVoq_L8cJ27DFow0RKLSIn/pub?gid=1392008086&single=true&output=csv"; // e.g., "https://docs.google.com/spreadsheets/d/e/.../pub?gid=<SUBJECTS_GID>&single=true&output=csv"
+
+    // If you’re testing with a static CSV (like the one you attached), you can host it and point the URL here.
+
+    let calendar;
+    let allEvents = [];
+    let tutorColors = {};
+    let tutorSubjectsMap = new Map(); // key: "First Last" → subjects string
+    let uniqueSubjectTokens = new Set();
+
+    const colorSchemes = [
+      'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',
+      'linear-gradient(135deg,#48bb78 0%,#38a169 100%)',
+      'linear-gradient(135deg,#ed8936 0%,#dd6b20 100%)',
+      'linear-gradient(135deg,#e53e3e 0%,#c53030 100%)',
+      'linear-gradient(135deg,#d69e2e 0%,#b7791f 100%)',
+      'linear-gradient(135deg,#805ad5 0%,#6b46c1 100%)',
+      'linear-gradient(135deg,#38b2ac 0%,#319795 100%)',
+      'linear-gradient(135deg,#3182ce 0%,#2c5282 100%)',
+      'linear-gradient(135deg,#e53e3e 0%,#9b2c2c 100%)',
+      'linear-gradient(135deg,#00b4d8 0%,#0077b6 100%)'
+    ];
+
+    function updateConnectionStatus(status) {
+      const statusDiv = document.getElementById('connectionStatus');
+      statusDiv.className = `connection-status ${status}`;
+      if (status === 'connected') {
+        statusDiv.innerHTML = '✅ Calendar loaded successfully';
+        setTimeout(() => { statusDiv.style.opacity = '0.7'; }, 3000);
+      } else if (status === 'error') {
+        statusDiv.innerHTML = '⚠️ Failed to load data';
+      } else {
+        statusDiv.innerHTML = '🔄 Loading calendar...';
+      }
+    }
+    function showLoading(){ document.getElementById('loadingOverlay').style.display='flex'; }
+    function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
+    function showError(message){
+      const calendarContainer = document.querySelector('.calendar-container');
+      const errorDiv = document.createElement('div');
+      errorDiv.className='error-message';
+      errorDiv.innerHTML = `<strong>⚠️ Error</strong><br>${message}<br><small>Please refresh and try again.</small>`;
+      calendarContainer.insertBefore(errorDiv, calendarContainer.firstChild);
+    }
+
+    // CSV parser that respects quotes
+    function parseCSVRow(row){
+      const result=[]; let current=''; let inQuotes=false;
+      for(let i=0;i<row.length;i++){
+        const c=row[i], next=row[i+1];
+        if(c==='"'){
+          if(inQuotes && next==='"'){ current+='"'; i++; }
+          else { inQuotes=!inQuotes; }
+        } else if(c===',' && !inQuotes){ result.push(current.trim()); current=''; }
+        else { current+=c; }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    async function fetchCSV(url){
+      const res = await fetch(url);
+      if(!res.ok) throw new Error(`HTTP ${res.status} loading ${url}`);
+      return res.text();
+    }
+
+    function indexByHeader(headers, wantedNames, fallbackIndex){
+      // Try to find a header whose normalized name matches any in wantedNames
+      if(headers && headers.length){
+        const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
+        const table = new Map(headers.map((h,idx)=>[norm(h), idx]));
+        for(const w of wantedNames){
+          const idx = table.get(norm(w));
+          if(idx!=null) return idx;
         }
+      }
+      return fallbackIndex; // fallback to a known column position if there are no headers
+    }
 
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
+    function normalizeTutorName(name){
+      return (name||'').trim().replace(/\s+/g,' ');
+    }
+
+    function buildSubjectsMapFromCSV(text){
+      const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
+      if(lines.length===0) return;
+
+      // Attempt to detect header
+      const first = parseCSVRow(lines[0]);
+      const looksLikeHeader = first.some(cell =>
+        /first|last|subject/i.test(cell)
+      );
+
+      let startIndex = 0;
+      let cFirst=2, cLast=3, cSubjects=19; // C,D,T (0-based indices if no header)
+      if(looksLikeHeader){
+        const headers = first;
+        cFirst   = indexByHeader(headers, ['First Name','First','Tutor First','TutorFirst'], 2);
+        cLast    = indexByHeader(headers, ['Last Name','Last','Tutor Last','TutorLast'], 3);
+        cSubjects= indexByHeader(headers, ['Subjects','Subject','Tutoring Subjects','Tutor Subjects'], 19);
+        startIndex = 1;
+      }
+
+      for(let i=startIndex;i<lines.length;i++){
+        const cols = parseCSVRow(lines[i]);
+        const firstName = cols[cFirst] || '';
+        const lastName  = cols[cLast] || '';
+        const subjStr   = cols[cSubjects] || '';
+        const fullName  = normalizeTutorName(`${firstName} ${lastName}`.trim());
+
+        if(fullName){
+          tutorSubjectsMap.set(fullName, subjStr);
+          // collect tokens for suggestions (split on commas/semicolons/slashes)
+          subjStr.split(/[;,/]/).map(s=>s.trim()).filter(Boolean).forEach(tok=>{
+            uniqueSubjectTokens.add(tok);
+          });
         }
+      }
+    }
 
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
+    function populateSubjectsDatalist(){
+      const list = document.getElementById('subjectsList');
+      list.innerHTML = '';
+      Array.from(uniqueSubjectTokens).sort((a,b)=>a.localeCompare(b)).forEach(tok=>{
+        const opt = document.createElement('option');
+        opt.value = tok;
+        list.appendChild(opt);
+      });
+    }
 
-        function showError(message) {
-            const calendarContainer = document.querySelector('.calendar-container');
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.innerHTML = `
-                <strong>⚠️ Google Sheets Connection Failed</strong><br>
-                ${message}<br>
-                <small>Make sure your sheet is publicly accessible and the SHEET_ID is correct.</small>
-            `;
-            calendarContainer.insertBefore(errorDiv, calendarContainer.firstChild);
-        }
+    function createTutorLegend(tutors){
+      const legendContainer = document.getElementById('tutorLegend');
+      legendContainer.innerHTML='';
+      tutors.forEach(tutor=>{
+        const item=document.createElement('div'); item.className='legend-item';
+        const colorBox=document.createElement('div'); colorBox.className='legend-color';
+        colorBox.style.background = tutorColors[tutor] || colorSchemes[0];
+        const label=document.createElement('span'); label.textContent=tutor;
+        item.appendChild(colorBox); item.appendChild(label);
+        legendContainer.appendChild(item);
+      });
+    }
 
-        // Properly construct Google Sheets CSV URLs
-        function buildSheetURL(sheetId, gid) {
-            return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-        }
+    function applyTutorColors(){
+      const style=document.createElement('style'); let css='';
+      Object.entries(tutorColors).forEach(([tutor,color])=>{
+        css += `.fc-event[data-tutor*="${tutor}"]{background:${color}!important;border:none!important}`;
+      });
+      style.textContent=css; document.head.appendChild(style);
+    }
 
-        // Enhanced CSV parsing function
-        function parseCSVRow(row) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            let i = 0;
+    function formatEventTitle(eventInfo){
+      const tutor = eventInfo.event.extendedProps.tutor;
+      const timeSlot = eventInfo.event.extendedProps.timeSlot;
+      return `${tutor}\n${timeSlot}`;
+    }
 
-            while (i < row.length) {
-                const char = row[i];
-                const nextChar = row[i + 1];
+    function eventMatchesFilters(evt, selectedTutor, subjectQuery){
+      const tutorName = evt.extendedProps.tutor || '';
+      // Tutor filter
+      if(selectedTutor !== 'all' && tutorName !== selectedTutor) return false;
 
-                if (char === '"') {
-                    if (inQuotes && nextChar === '"') {
-                        current += '"';
-                        i += 2;
-                    } else {
-                        inQuotes = !inQuotes;
-                        i++;
-                    }
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
-                    i++;
-                } else {
-                    current += char;
-                    i++;
-                }
-            }
+      // Subject filter (contains; case-insensitive)
+      const q = (subjectQuery||'').trim().toLowerCase();
+      if(!q) return true;
 
-            result.push(current.trim());
-            return result;
-        }
+      // Try to find subjects string for this tutor
+      // We try both exact event tutor (often already "First Last") and a normalized variant
+      const subjectsStr =
+        tutorSubjectsMap.get(tutorName) ||
+        tutorSubjectsMap.get(normalizeTutorName(tutorName)) ||
+        '';
 
-        async function loadEmployeeData() {
-            try {
-                console.log('Loading employee data...');
-                
-                const employeeUrl = buildSheetURL(SHEET_ID, EMPLOYEE_GID);
-                console.log('Employee data URL:', employeeUrl);
-                
-                const response = await fetch(employeeUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const text = await response.text();
-                console.log('Employee data received:', text.substring(0, 200) + '...');
-                
-                const rows = text.split("\n").filter(row => row.trim()).slice(1); // Remove header and empty rows
-                
-                rows.forEach((row) => {
-                    const cols = parseCSVRow(row);
-                    if (cols.length < 2) return; // Need at least name and subjects
+      return subjectsStr.toLowerCase().includes(q);
+    }
 
-                    const tutorName = cols[0].replace(/"/g, '').trim();
-                    const subjects = cols[1].replace(/"/g, '').split(',').map(s => s.trim()).filter(s => s.length > 0);
-                    const color = cols.length > 2 ? cols[2].replace(/"/g, '').trim() : '#667eea';
+    function applyFiltersUI(){
+      const selectedTutor = document.getElementById('tutorFilter').value;
+      const subjectQuery  = document.getElementById('subjectFilter').value;
 
-                    if (!tutorName) return;
+      calendar.getEvents().forEach(evt=>{
+        const matches = eventMatchesFilters(evt, selectedTutor, subjectQuery);
+        evt.setProp('display', matches ? 'auto' : 'none');
+      });
 
-                    tutorData[tutorName] = {
-                        subjects: subjects,
-                        color: color || '#667eea'
-                    };
+      // Fade legend
+      const legendItems = document.querySelectorAll('.legend-item');
+      legendItems.forEach(item=>{
+        const tutorName = item.querySelector('span').textContent;
+        const matchesTutor = (selectedTutor==='all' || tutorName===selectedTutor);
+        item.style.opacity = matchesTutor ? '1' : '0.3';
+      });
+    }
 
-                    subjects.forEach(subject => {
-                        allSubjects.add(subject);
-                        if (!subjectToTutors[subject]) {
-                            subjectToTutors[subject] = [];
-                        }
-                        subjectToTutors[subject].push(tutorName);
-                    });
+    async function loadAvailability(){
+      const text = await fetchCSV(sheetCSV);
+      const rows = text.split("\n").slice(1); // skip header
+      let events=[], tutors=new Set(), colorIndex=0;
+
+      rows.forEach(row=>{
+        if(!row.trim()) return;
+        const cols = parseCSVRow(row);
+        if(cols.length<3) return;
+
+        const tutor = (cols[0]||'').trim();
+        const date  = (cols[1]||'').trim();
+        const slots = (cols[2]||'').trim();
+        if(!tutor || !date) return;
+
+        tutors.add(tutor);
+        if(!tutorColors[tutor]){ tutorColors[tutor]=colorSchemes[colorIndex%colorSchemes.length]; colorIndex++; }
+
+        if(slots && slots!=='Busy all day'){
+          slots.split(",").forEach(slot=>{
+            const timeRange = slot.trim();
+            if(timeRange.includes("-")){
+              const [startTime,endTime] = timeRange.split("-").map(t=>t.trim());
+              if(startTime && endTime){
+                events.push({
+                  title:`${tutor} - Available`,
+                  start:`${date}T${startTime}`,
+                  end:`${date}T${endTime}`,
+                  extendedProps:{ tutor, timeSlot:timeRange, originalSlots:slots },
+                  backgroundColor:'transparent',
+                  borderColor:'transparent',
+                  className:'tutor-event',
+                  display:'block'
                 });
-
-                console.log(`Loaded employee data for ${Object.keys(tutorData).length} tutors`);
-                return true;
-                
-            } catch (error) {
-                console.log('Failed to load employee data from Google Sheets:', error);
-                
-                // Use sample employee data
-                const mockEmployees = [
-                    { name: "Dr. Sarah Johnson", subjects: "Mathematics,Calculus,Statistics,Physics", color: "#FF6B6B" },
-                    { name: "Prof. Michael Chen", subjects: "Computer Science,Programming,Data Structures", color: "#4ECDC4" },
-                    { name: "Ms. Emily Rodriguez", subjects: "English,Literature,Writing", color: "#45B7D1" },
-                    { name: "Dr. David Smith", subjects: "Chemistry,Biology,Organic Chemistry", color: "#96CEB4" },
-                    { name: "Mrs. Lisa Wang", subjects: "History,Social Studies,Geography", color: "#FFEAA7" },
-                    { name: "Mr. James Brown", subjects: "Spanish,French,Italian", color: "#DDA0DD" }
-                ];
-
-                mockEmployees.forEach(employee => {
-                    const tutorName = employee.name;
-                    const subjects = employee.subjects.split(',').map(s => s.trim());
-                    const color = employee.color;
-
-                    tutorData[tutorName] = {
-                        subjects: subjects,
-                        color: color
-                    };
-
-                    subjects.forEach(subject => {
-                        allSubjects.add(subject);
-                        if (!subjectToTutors[subject]) {
-                            subjectToTutors[subject] = [];
-                        }
-                        subjectToTutors[subject].push(tutorName);
-                    });
-                });
-
-                return false; // Indicates we're using fallback data
+              }
             }
+          });
         }
+      });
 
-        async function loadAvailabilityData() {
-            try {
-                console.log('Loading availability data...');
-                
-                const availabilityUrl = buildSheetURL(SHEET_ID, AVAILABILITY_GID);
-                console.log('Availability data URL:', availabilityUrl);
-                
-                const response = await fetch(availabilityUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const text = await response.text();
-                console.log('Availability data received:', text.substring(0, 200) + '...');
-                
-                const rows = text.split("\n").filter(row => row.trim()).slice(1); // Remove header and empty rows
-                let events = [];
-                let tutors = new Set();
+      return {events, tutors: Array.from(tutors)};
+    }
 
-                rows.forEach((row) => {
-                    const cols = parseCSVRow(row);
-                    if (cols.length < 3) return; // Need tutor, date, slots
+    async function loadSubjectsIfConfigured(){
+      if(!subjectsCSV) return; // not configured yet
+      try{
+        const text = await fetchCSV(subjectsCSV);
+        buildSubjectsMapFromCSV(text);
+        populateSubjectsDatalist();
+      }catch(err){
+        console.warn('Subjects CSV failed to load:', err.message);
+      }
+    }
 
-                    const tutor = cols[0].replace(/"/g, '').trim();
-                    const date = cols[1].replace(/"/g, '').trim();
-                    const slots = cols[2].replace(/"/g, '').trim();
+    document.addEventListener("DOMContentLoaded", async function(){
+      try{
+        updateConnectionStatus('loading'); showLoading();
 
-                    if (!tutor || !date) return;
+        // Load both data sources
+        const [{events, tutors}] = await Promise.all([
+          loadAvailability()
+        ]);
+        allEvents = events;
 
-                    tutors.add(tutor);
+        // Try to load subjects map (optional but enables subject suggestions + filtering)
+        await loadSubjectsIfConfigured();
 
-                    // Parse date to ensure correct format (YYYY-MM-DD)
-                    let formattedDate = date;
-                    if (date.includes('/')) {
-                        // Convert MM/DD/YYYY to YYYY-MM-DD
-                        const parts = date.split('/');
-                        if (parts.length === 3) {
-                            formattedDate = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-                        }
-                    }
-
-                    if (slots && slots !== "Busy all day" && slots !== "") {
-                        const timeSlots = slots.split(",");
-                        
-                        timeSlots.forEach(slot => {
-                            const timeRange = slot.trim();
-                            if (timeRange.includes("-")) {
-                                const [startTime, endTime] = timeRange.split("-").map(t => t.trim());
-                                
-                                // Convert time format if needed (12-hour to 24-hour)
-                                function convertTo24Hour(time) {
-                                    if (time.includes('AM') || time.includes('PM')) {
-                                        // Handle 12-hour format
-                                        let [timePart, period] = time.split(/\s*(AM|PM)/i);
-                                        let [hours, minutes = '00'] = timePart.split(':');
-                                        hours = parseInt(hours);
-                                        
-                                        if (period.toUpperCase() === 'PM' && hours !== 12) {
-                                            hours += 12;
-                                        } else if (period.toUpperCase() === 'AM' && hours === 12) {
-                                            hours = 0;
-                                        }
-                                        
-                                        return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-                                    }
-                                    return time; // Already in 24-hour format
-                                }
-                                
-                                const formattedStartTime = convertTo24Hour(startTime);
-                                const formattedEndTime = convertTo24Hour(endTime);
-                                
-                                if (formattedStartTime && formattedEndTime) {
-                                    events.push({
-                                        title: `${tutor} - Available`,
-                                        start: `${formattedDate}T${formattedStartTime}`,
-                                        end: `${formattedDate}T${formattedEndTime}`,
-                                        extendedProps: { 
-                                            tutor: tutor,
-                                            timeSlot: timeRange,
-                                            originalSlots: slots,
-                                            subjects: tutorData[tutor] ? tutorData[tutor].subjects : []
-                                        },
-                                        backgroundColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
-                                        borderColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
-                                        className: 'tutor-event',
-                                        display: 'block'
-                                    });
-                                }
-                            }
-                        });
-                    }
-                });
-
-                console.log(`Loaded ${events.length} events from Google Sheets`);
-                return { events, tutors: Array.from(tutors), fromSheets: true };
-                
-            } catch (error) {
-                console.log('Failed to load availability data from Google Sheets:', error);
-                
-                // Generate sample availability data
-                const today = new Date();
-                const events = [];
-                const tutors = Object.keys(tutorData);
-                
-                // Generate sample events for the next 14 days
-                for (let i = 0; i < 14; i++) {
-                    const date = new Date(today);
-                    date.setDate(today.getDate() + i);
-                    const dateStr = date.toISOString().split('T')[0];
-                    
-                    // Skip weekends for sample data
-                    if (date.getDay() === 0 || date.getDay() === 6) continue;
-                    
-                    // Add some random availability for each tutor
-                    tutors.forEach((tutor, index) => {
-                        if (Math.random() > 0.4) { // 60% chance of availability
-                            const startHour = 9 + Math.floor(Math.random() * 8); // 9 AM to 4 PM
-                            const duration = 1 + Math.floor(Math.random() * 2); // 1-2 hours
-                            
-                            const startTime = `${startHour.toString().padStart(2, '0')}:00`;
-                            const endTime = `${(startHour + duration).toString().padStart(2, '0')}:00`;
-                            
-                            events.push({
-                                title: `${tutor} - Available`,
-                                start: `${dateStr}T${startTime}`,
-                                end: `${dateStr}T${endTime}`,
-                                extendedProps: { 
-                                    tutor: tutor,
-                                    timeSlot: `${startTime}-${endTime}`,
-                                    subjects: tutorData[tutor] ? tutorData[tutor].subjects : []
-                                },
-                                backgroundColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
-                                borderColor: tutorData[tutor] ? tutorData[tutor].color : '#667eea',
-                                className: 'tutor-event',
-                                display: 'block'
-                            });
-                        }
-                    });
-                }
-                
-                return { events, tutors, fromSheets: false };
-            }
-        }
-
-        async function loadData() {
-            try {
-                updateConnectionStatus('loading');
-                showLoading();
-
-                // Load employee data first
-                const employeeSuccess = await loadEmployeeData();
-                
-                // Then load availability data
-                const { events, tutors, fromSheets } = await loadAvailabilityData();
-                
-                if (employeeSuccess && fromSheets) {
-                    updateConnectionStatus('connected');
-                    // Hide the configuration notice if successful
-                    const configNotice = document.querySelector('.config-notice');
-                    if (configNotice) {
-                        configNotice.style.display = 'none';
-                    }
-                } else {
-                    updateConnectionStatus('error');
-                    showError('Could not connect to Google Sheets. Please check your SHEET_ID and GID values, and ensure your sheet is publicly accessible.');
-                }
-                
-                return { events, tutors };
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                updateConnectionStatus('error');
-                showError('Failed to load data from Google Sheets. Using sample data for demonstration.');
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function populateFilters(tutors) {
-            // Populate tutor filter
-            const tutorFilter = document.getElementById("tutorFilter");
-            tutorFilter.innerHTML = '<option value="all">All Tutors</option>';
-            
-            tutors.forEach(tutor => {
-                const option = document.createElement("option");
-                option.value = tutor;
-                option.textContent = tutor;
-                tutorFilter.appendChild(option);
-            });
-
-            // Populate subject filter
-            const subjectFilter = document.getElementById("subjectFilter");
-            subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
-            
-            const sortedSubjects = Array.from(allSubjects).sort();
-            sortedSubjects.forEach(subject => {
-                const option = document.createElement("option");
-                option.value = subject;
-                option.textContent = subject;
-                subjectFilter.appendChild(option);
-            });
-        }
-
-        function createTutorLegend(tutors) {
-            const legendContainer = document.getElementById('tutorLegend');
-            legendContainer.innerHTML = '';
-            
-            tutors.forEach(tutor => {
-                const legendItem = document.createElement('div');
-                legendItem.className = 'legend-item';
-                legendItem.setAttribute('data-tutor', tutor);
-                
-                const colorBox = document.createElement('div');
-                colorBox.className = 'legend-color';
-                colorBox.style.backgroundColor = tutorData[tutor] ? tutorData[tutor].color : '#667eea';
-                
-                const label = document.createElement('span');
-                label.textContent = tutor;
-                
-                const subjects = tutorData[tutor] ? tutorData[tutor].subjects.join(', ') : 'No subjects listed';
-                legendItem.setAttribute('title', `Subjects: ${subjects}`);
-                
-                legendItem.appendChild(colorBox);
-                legendItem.appendChild(label);
-                legendContainer.appendChild(legendItem);
-            });
-        }
-
-        function applyFilters() {
-            const selectedTutor = document.getElementById("tutorFilter").value;
-            const selectedSubject = document.getElementById("subjectFilter").value;
-            
-            let visibleTutors = new Set();
-
-            calendar.getEvents().forEach(event => {
-                const eventTutor = event.extendedProps.tutor;
-                const eventSubjects = event.extendedProps.subjects || [];
-                
-                let showEvent = true;
-
-                if (selectedTutor !== "all" && eventTutor !== selectedTutor) {
-                    showEvent = false;
-                }
-
-                if (selectedSubject !== "all") {
-                    const tutorHasSubject = eventSubjects.some(subject => 
-                        subject.toLowerCase().includes(selectedSubject.toLowerCase()) ||
-                        selectedSubject.toLowerCase().includes(subject.toLowerCase())
-                    );
-                    if (!tutorHasSubject) {
-                        showEvent = false;
-                    }
-                }
-
-                if (showEvent) {
-                    event.setProp('display', 'auto');
-                    visibleTutors.add(eventTutor);
-                } else {
-                    event.setProp('display', 'none');
-                }
-            });
-            
-            // Update legend visibility
-            const legendItems = document.querySelectorAll('.legend-item');
-            legendItems.forEach(item => {
-                const tutorName = item.querySelector('span').textContent;
-                if (visibleTutors.has(tutorName)) {
-                    item.style.opacity = '1';
-                    item.style.transform = 'scale(1)';
-                } else {
-                    item.style.opacity = '0.3';
-                    item.style.transform = 'scale(0.95)';
-                }
-            });
-        }
-
-        function clearAllFilters() {
-            document.getElementById("tutorFilter").value = "all";
-            document.getElementById("subjectFilter").value = "all";
-            applyFilters();
-        }
-
-        document.addEventListener("DOMContentLoaded", async function() {
-            try {
-                const { events, tutors } = await loadData();
-                allEvents = events;
-
-                populateFilters(tutors);
-                createTutorLegend(tutors);
-
-                const calendarEl = document.getElementById("calendar");
-                calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-                    },
-                    height: 'auto',
-                    events: events,
-                    eventDidMount: function(info) {
-                        const tutor = info.event.extendedProps.tutor;
-                        info.el.setAttribute('data-tutor', tutor);
-                        
-                        const subjects = tutorData[tutor] ? tutorData[tutor].subjects.join(', ') : 'No subjects listed';
-                        info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}\nSubjects: ${subjects}`);
-                        
-                        setTimeout(() => {
-                            info.el.classList.add('new-event');
-                        }, Math.random() * 500);
-                    },
-                    eventClick: function(info) {
-                        const subjects = info.event.extendedProps.subjects.join(', ') || 'No subjects listed';
-                        alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}\nSubjects: ${subjects}`);
-                    },
-                    loading: function(isLoading) {
-                        if (isLoading) {
-                            showLoading();
-                        } else {
-                            hideLoading();
-                        }
-                    }
-                });
-
-                calendar.render();
-
-                document.getElementById("tutorFilter").addEventListener("change", applyFilters);
-                document.getElementById("subjectFilter").addEventListener("change", applyFilters);
-                document.getElementById("clearFilters").addEventListener("click", clearAllFilters);
-
-                function handleResize() {
-                    if (window.innerWidth < 768) {
-                        calendar.changeView('listWeek');
-                    } else {
-                        calendar.changeView('timeGridWeek');
-                    }
-                }
-
-                window.addEventListener('resize', handleResize);
-                console.log('Calendar initialized successfully');
-
-            } catch (error) {
-                console.error('Failed to initialize calendar:', error);
-                showError('Failed to initialize calendar. Please refresh the page.');
-            }
+        // Populate tutor dropdown
+        const tutorFilter = document.getElementById('tutorFilter');
+        tutors.forEach(tutor=>{
+          const opt=document.createElement('option');
+          opt.value=tutor; opt.textContent=tutor;
+          tutorFilter.appendChild(opt);
         });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (calendar) {
-                if (e.key === 'ArrowLeft' && e.ctrlKey) {
-                    e.preventDefault();
-                    calendar.prev();
-                } else if (e.key === 'ArrowRight' && e.ctrlKey) {
-                    e.preventDefault();
-                    calendar.next();
-                } else if (e.key === 'Home' && e.ctrlKey) {
-                    e.preventDefault();
-                    calendar.today();
-                } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    clearAllFilters();
-                }
-            }
+        // Legend + colors
+        createTutorLegend(tutors);
+        applyTutorColors();
+
+        // Init calendar
+        const calendarEl = document.getElementById("calendar");
+        calendar = new FullCalendar.Calendar(calendarEl,{
+          initialView: window.innerWidth<768 ? 'listWeek':'timeGridWeek',
+          headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+          height:'auto',
+          events: events,
+          eventDidMount(info){
+            const tutor = info.event.extendedProps.tutor;
+            info.el.setAttribute('data-tutor', tutor);
+            info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+            setTimeout(()=>{ info.el.classList.add('new-event'); }, Math.random()*500);
+          },
+          eventClick(info){
+            alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+          },
+          loading(isLoading){ if(isLoading) showLoading(); else hideLoading(); }
+        });
+        calendar.render();
+
+        // Wire up filters
+        tutorFilter.addEventListener('change', applyFiltersUI);
+        document.getElementById('subjectFilter').addEventListener('input', applyFiltersUI);
+        document.getElementById('clearSubject').addEventListener('click', ()=>{
+          document.getElementById('subjectFilter').value='';
+          applyFiltersUI();
         });
 
-        document.documentElement.style.scrollBehavior = 'smooth';
+        // Responsive
+        function handleResize(){ calendar.changeView(window.innerWidth<768 ? 'listWeek':'timeGridWeek'); }
+        window.addEventListener('resize', handleResize);
 
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('dark-theme');
-        }
-    </script>
+        updateConnectionStatus('connected');
+      }catch(err){
+        console.error(err);
+        updateConnectionStatus('error');
+        showError(err.message||'Failed to initialize calendar.');
+      }finally{
+        hideLoading();
+      }
+    });
+
+    // Keyboard shortcuts (unchanged)
+    document.addEventListener('keydown', function(e){
+      if(!calendar) return;
+      if(e.key==='ArrowLeft' && e.ctrlKey){ e.preventDefault(); calendar.prev(); }
+      else if(e.key==='ArrowRight' && e.ctrlKey){ e.preventDefault(); calendar.next(); }
+      else if(e.key==='Home' && e.ctrlKey){ e.preventDefault(); calendar.today(); }
+    });
+
+    document.documentElement.style.scrollBehavior='smooth';
+    if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ document.body.classList.add('dark-theme'); }
+  </script>
 </body>
 </html>
