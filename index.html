@@ -330,9 +330,9 @@
   const t2 = (t2Visible && tutorSelect2.value && tutorSelect2.value !== 'none') ? tutorSelect2.value : null;
 
   const q = (subjectInput?.value || '').trim().toLowerCase();
-  const doSubject = q.length >= 2;
+  const doSubject = q.length >= 1;
 
-  let allowedTutors = null;
+  let allowedTutors = new Set();
   if (doSubject && tutorSubjectsMapLower.size > 0) {
     allowedTutors = new Set();
     tutorSubjectsMapLower.forEach((subjectsLower, tutorLowerName) => {
