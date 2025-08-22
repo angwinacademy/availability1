@@ -232,6 +232,8 @@
     function normalizeTutorName(name){
       return (name||'').trim().replace(/\s+/g,' ');
     }
+    function normalizeLower(name){ return normalizeTutorName(name).toLowerCase(); }
+
 
     function buildSubjectsMapFromCSV(text){
       const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
@@ -262,7 +264,7 @@
 
         if(fullName){
           tutorSubjectsMap.set(fullName, subjStr);
-          tutorSubjectsMapLower.set(fullName.toLowerCase(), (subjStr||"").toLowerCase());
+          tutorSubjectsMapLower.set(normalizeLower(fullName), (subjStr||"").toLowerCase());
           // collect tokens for suggestions (split on commas/semicolons/slashes)
           subjStr.split(/[;,/]/).map(s=>s.trim()).filter(Boolean).forEach(tok=>{
             uniqueSubjectTokens.add(tok);
@@ -331,7 +333,7 @@
   const doSubject = q.length >= 2;
 
   let allowedTutors = null;
-  if (doSubject) {
+  if (doSubject && tutorSubjectsMapLower.size > 0) {
     allowedTutors = new Set();
     tutorSubjectsMapLower.forEach((subjectsLower, tutorLowerName) => {
       if (subjectsLower.includes(q)) allowedTutors.add(tutorLowerName);
