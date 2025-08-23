@@ -85,7 +85,7 @@
     }
 
   
-/* Compact filters bar (keeps existing theme) */
+/* v9: Compact filters bar (preserve theme) */
 .filters-bar {
   display: flex;
   gap: 8px;
@@ -99,9 +99,15 @@
   margin: 0;
   vertical-align: middle;
 }
-/* Optional: keep inputs reasonably compact on smaller viewports */
 @media (max-width: 720px){
   .filters-bar { gap: 6px; }
+}
+
+/* v10: inline pair for All Tutors + Add second tutor */
+.inline-flex-pair{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
 }
 </style>
 </head>
@@ -115,41 +121,29 @@
     </div>
 
     <!-- Filters -->
-    <!-- Filters -->
-  <div class="filters-container">
-    <div class="filters-grid">
-      <div class="filter-group">
-        <label for="tutorFilter">🎓 Filter by Tutor:</label>
-        <div class="filters-bar">
-          <!-- First tutor dropdown -->
-          <select id="tutorFilter">
+    <div class="filters-container">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label for="tutorFilter">🎓 Filter by Tutor:</label>
+          <div class="inline-flex-pair">
+<select id="tutorFilter">
             <option value="all">All Tutors</option>
+          
           </select>
-  
-          <!-- Add second tutor button immediately to the right -->
-          <button id="toggleTutor2" class="btn" type="button" title="Compare two tutors" style="padding:8px 10px; margin-left:8px;">
-            Add second tutor
-          </button>
-  
-          <!-- Second tutor dropdown (hidden until button is clicked) -->
-          <select id="tutorFilter2" style="display:none; min-width:200px;">
-            <option value="none">— Select second tutor —</option>
-          </select>
-  
-          <!-- Remove second tutor button -->
-          <button id="removeTutor2" class="btn" type="button" title="Remove second tutor" style="display:none;padding:6px 8px;width:34px;height:34px;line-height:1">
-            ×
-          </button>
+<button id="toggleTutor2" class="btn" type="button" title="Compare two tutors" style="padding:8px 10px">Add second tutor</button>
+</div>
+<div class="filter-row" style="margin-top:8px; gap:8px;"><select id="tutorFilter2" style="display:none; min-width:200px;">
+              <option value="none">— Select second tutor —</option>
+            </select>
+            <button id="removeTutor2" class="btn" type="button" title="Remove second tutor" style="display:none;padding:6px 8px;width:34px;height:34px;line-height:1">×</button>
+          <span id="tutor2Hint" style="display:none; color:#718096; font-size:12px">Showing union of Tutor 1 and Tutor 2</span>
+        
         </div>
-      </div>
-    </div>
-  </div>
-
 
         <div class="filter-group">
-          <label for="subjectFilter">📘 Filter by Subject :</label>
+          <label for="subjectFilter">📘 Filter by Subject (type to search; matches “contains”):</label>
           <div class="filter-row" style="position:relative">
-            <input id="subjectFilter" placeholder="Type subject" autocomplete="off"/>
+            <input id="subjectFilter" placeholder="Type subject (e.g. ELA, algebra, biology)" autocomplete="off"/>
             <div id="subjectSuggestions" class="subject-suggestions" style="display:none"></div>
             <button id="applySubject" class="btn" title="Search">Search</button>
             <button id="clearSubject" class="btn" title="Clear subject" style="padding:6px 10px;width:36px;height:36px;line-height:1;font-size:16px;display:inline-flex;align-items:center;justify-content:center">×</button>
@@ -366,12 +360,14 @@
 
   // Build set of allowed tutor names (lowercased) for subject filter
   let allowedLower = null;
-  if (doSubject && tutorSubjectsMapLower.size > 0) {
+  if (doSubject && typeof tutorSubjectsMapLower !== 'undefined' && tutorSubjectsMapLower.size > 0) {
     allowedLower = new Set();
     tutorSubjectsMapLower.forEach((subjectsLower, tutorLowerName) => {
       if (subjectsLower.includes(q)) allowedLower.add(tutorLowerName);
     });
   }
+
+  if (!window.calendar) return;
 
   calendar.batchRendering(() => {
     const evts = calendar.getEvents();
@@ -675,38 +671,32 @@
     if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ document.body.classList.add('dark-theme'); }
   </script>
 <script>
-/* Filters bar setup: keep controls on one line (wrapping) and wire subject dropdown to auto-apply */
+/* v9: Subject auto-apply and convert container to .filters-bar */
 (function(){
   const f1 = document.getElementById('tutorFilter');
   const f2 = document.getElementById('tutorFilter2');
   const subj = document.getElementById('subjectFilter');
   const searchBtn = document.getElementById('searchBtn');
 
-  // Find a suitable container to style as a flex row (prefer a shared parent)
+  // Promote the nearest shared parent to a flex "filters-bar" row
   const container = (function(){
     if (f1 && f2 && subj) {
-      // deepest common parent
       let p = f1.parentElement;
       while (p && !(p.contains(f1) && p.contains(f2) && p.contains(subj))) p = p.parentElement;
       return p || (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
     }
     return (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
   })();
-  if (container) container.classList.add('filters-bar');
+  if (container && !container.classList.contains('filters-bar')) container.classList.add('filters-bar');
 
-  // Treat selecting a subject like pressing search/enter
   if (subj) {
-    subj.addEventListener('change', function(){
+    const trigger = () => {
       if (typeof applyFiltersUI === 'function') applyFiltersUI();
       else if (searchBtn) searchBtn.click();
-    });
-    // If it's a text input (or combobox), also allow Enter
+    };
+    subj.addEventListener('change', trigger);
     subj.addEventListener('keydown', function(e){
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (typeof applyFiltersUI === 'function') applyFiltersUI();
-        else if (searchBtn) searchBtn.click();
-      }
+      if (e.key === 'Enter') { e.preventDefault(); trigger(); }
     });
   }
 })();
