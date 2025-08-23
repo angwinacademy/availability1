@@ -332,14 +332,12 @@
   const q = (subjectInput?.value || '').trim().toLowerCase();
   const doSubject = q.length >= 1;
 
-  let allowedFull = new Set();
-  let allowedFirst = new Set();
+  // Build set of allowed tutor names (lowercased) for subject filter
+  let allowedLower = null;
   if (doSubject && tutorSubjectsMapLower.size > 0) {
-    allowedTutors = new Set();
+    allowedLower = new Set();
     tutorSubjectsMapLower.forEach((subjectsLower, tutorLowerName) => {
-      if (subjectsLower.includes(q)) allowedFull.add(tutorLowerName);
-      const firstTok = tutorLowerName.split(' ')[0];
-      if (firstTok) allowedFirst.add(firstTok);
+      if (subjectsLower.includes(q)) allowedLower.add(tutorLowerName);
     });
   }
 
@@ -347,28 +345,30 @@
     const evts = calendar.getEvents();
     for (let i=0; i<evts.length; i++) {
       const evt = evts[i];
-      const tutor = evt.extendedProps.tutor;
-      const tutorLower = evt.extendedProps.tutorLower;
+      const tutor = evt.extendedProps.tutor || '';
+      const tutorLower = (evt.extendedProps.tutorLower || tutor.toLowerCase());
 
       let ok = true;
-      // Tutor logic: if two tutors selected, union
+
+      // Tutor selection: if two tutors are shown, use union; otherwise single selection.
       if (t1 !== 'all' && !t2) {
         ok = (tutor === t1);
       } else if (t1 !== 'all' && t2) {
         ok = (tutor === t1 || tutor === t2);
-      } // else t1 === 'all' => no restriction unless t2 present
-      else if (t1 === 'all' && t2) {
+      } else if (t1 === 'all' && t2) {
         ok = (tutor === t2);
       }
 
-      if (ok && doSubject) {
-        ok = allowedTutors.has(tutorLower);
+      // Subject filter (contains; case-insensitive) using prebuilt map
+      if (ok && doSubject && allowedLower) {
+        ok = allowedLower.has(tutorLower);
       }
+
       evt.setProp('display', ok ? 'auto' : 'none');
     }
   });
 
-  // Legend emphasis only for primary tutor selection
+  // Legend emphasis: highlight primary tutor (or all if 'all')
   const legendItems = document.querySelectorAll('.legend-item');
   for (let i=0; i<legendItems.length; i++){
     const item = legendItems[i];
@@ -407,7 +407,7 @@
                   title:`${tutor} - Available`,
                   start:`${date}T${startTime}`,
                   end:`${date}T${endTime}`,
-                  extendedProps:{ tutor, timeSlot:timeRange, originalSlots:slots },
+                  extendedProps:{ tutor, tutorLower: tutor.toLowerCase(), timeSlot:timeRange, originalSlots:slots },
                   backgroundColor:'transparent',
                   borderColor:'transparent',
                   className:'tutor-event',
