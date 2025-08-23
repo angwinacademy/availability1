@@ -115,23 +115,36 @@
     </div>
 
     <!-- Filters -->
-    <div class="filters-container">
-      <div class="filters-grid">
-        <div class="filter-group">
-          <label for="tutorFilter">🎓 Filter by Tutor:</label>
+    <!-- Filters -->
+  <div class="filters-container">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="tutorFilter">🎓 Filter by Tutor:</label>
+        <div class="filters-bar">
+          <!-- First tutor dropdown -->
           <select id="tutorFilter">
             <option value="all">All Tutors</option>
-          
           </select>
-          <div class="filter-row" style="margin-top:8px; gap:8px;">
-            <button id="toggleTutor2" class="btn" type="button" title="Compare two tutors" style="padding:8px 10px">Add second tutor</button>
-            <select id="tutorFilter2" style="display:none; min-width:200px;">
-              <option value="none">— Select second tutor —</option>
-            </select>
-            <button id="removeTutor2" class="btn" type="button" title="Remove second tutor" style="display:none;padding:6px 8px;width:34px;height:34px;line-height:1">×</button>
-<!--           <span id="tutor2Hint" style="display:none; color:#718096; font-size:12px">Showing union of Tutor 1 and Tutor 2</span>
-         -->
+  
+          <!-- Add second tutor button immediately to the right -->
+          <button id="toggleTutor2" class="btn" type="button" title="Compare two tutors" style="padding:8px 10px; margin-left:8px;">
+            Add second tutor
+          </button>
+  
+          <!-- Second tutor dropdown (hidden until button is clicked) -->
+          <select id="tutorFilter2" style="display:none; min-width:200px;">
+            <option value="none">— Select second tutor —</option>
+          </select>
+  
+          <!-- Remove second tutor button -->
+          <button id="removeTutor2" class="btn" type="button" title="Remove second tutor" style="display:none;padding:6px 8px;width:34px;height:34px;line-height:1">
+            ×
+          </button>
         </div>
+      </div>
+    </div>
+  </div>
+
 
         <div class="filter-group">
           <label for="subjectFilter">📘 Filter by Subject :</label>
