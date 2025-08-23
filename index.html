@@ -84,7 +84,26 @@
       background:rgba(248,250,252,.9);
     }
 
-  </style>
+  
+/* Compact filters bar (keeps existing theme) */
+.filters-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filters-bar .control,
+.filters-bar select,
+.filters-bar input,
+.filters-bar button {
+  margin: 0;
+  vertical-align: middle;
+}
+/* Optional: keep inputs reasonably compact on smaller viewports */
+@media (max-width: 720px){
+  .filters-bar { gap: 6px; }
+}
+</style>
 </head>
 <body>
   <div id="connectionStatus" class="connection-status loading">🔄 Loading calendar...</div>
@@ -642,5 +661,42 @@
     document.documentElement.style.scrollBehavior='smooth';
     if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ document.body.classList.add('dark-theme'); }
   </script>
+<script>
+/* Filters bar setup: keep controls on one line (wrapping) and wire subject dropdown to auto-apply */
+(function(){
+  const f1 = document.getElementById('tutorFilter');
+  const f2 = document.getElementById('tutorFilter2');
+  const subj = document.getElementById('subjectFilter');
+  const searchBtn = document.getElementById('searchBtn');
+
+  // Find a suitable container to style as a flex row (prefer a shared parent)
+  const container = (function(){
+    if (f1 && f2 && subj) {
+      // deepest common parent
+      let p = f1.parentElement;
+      while (p && !(p.contains(f1) && p.contains(f2) && p.contains(subj))) p = p.parentElement;
+      return p || (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
+    }
+    return (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
+  })();
+  if (container) container.classList.add('filters-bar');
+
+  // Treat selecting a subject like pressing search/enter
+  if (subj) {
+    subj.addEventListener('change', function(){
+      if (typeof applyFiltersUI === 'function') applyFiltersUI();
+      else if (searchBtn) searchBtn.click();
+    });
+    // If it's a text input (or combobox), also allow Enter
+    subj.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (typeof applyFiltersUI === 'function') applyFiltersUI();
+        else if (searchBtn) searchBtn.click();
+      }
+    });
+  }
+})();
+</script>
 </body>
 </html>
