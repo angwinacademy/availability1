@@ -182,6 +182,7 @@
     let calendar;
     let allEvents = [];
     let tutorColors = {};
+    let tutorColorHex = {}; // NEW: per-tutor hex from Subjects!U
     let tutorSubjectsMap = new Map(); // key: "First Last" → subjects string
     let tutorSubjectsMapLower = new Map(); // lowercased name → lowercased subjects
     let uniqueSubjectTokens = new Set();
@@ -262,24 +263,51 @@
 
 
     function buildSubjectsMapFromCSV(text){
-      const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
-      if(lines.length===0) return;
+  const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
+  if(lines.length===0) return;
 
-      // Attempt to detect header
-      const first = parseCSVRow(lines[0]);
-      const looksLikeHeader = first.some(cell =>
-        /first|last|subject/i.test(cell)
-      );
+  const first = parseCSVRow(lines[0]);
+  const looksLikeHeader = first.some(cell => /first|last|subject|color/i.test(cell));
 
-      let startIndex = 0;
-      let cFirst=2, cLast=3, cSubjects=19; // C,D,T (0-based indices if no header)
-      if(looksLikeHeader){
-        const headers = first;
-        cFirst   = indexByHeader(headers, ['First Name','First','Tutor First','TutorFirst'], 2);
-        cLast    = indexByHeader(headers, ['Last Name','Last','Tutor Last','TutorLast'], 3);
-        cSubjects= indexByHeader(headers, ['Subjects','Subject','Tutoring Subjects','Tutor Subjects'], 19);
-        startIndex = 1;
-      }
+  // Defaults when NO header (0-based): C=2 First, D=3 Last, T=19 Subjects, U=20 Color
+  let startIndex = 0;
+  let cFirst = 2, cLast = 3, cSubjects = 19, cColor = 20;
+
+  if(looksLikeHeader){
+    const headers = first;
+    const idx = (names, fallback) => indexByHeader(headers, names, fallback);
+    cFirst    = idx(['First Name','First','Tutor First','TutorFirst'], 2);
+    cLast     = idx(['Last Name','Last','Tutor Last','TutorLast'], 3);
+    cSubjects = idx(['Subjects','Subject','Tutoring Subjects','Tutor Subjects'], 19);
+    cColor    = idx(['Calendar Color','Color','Event Color'], 20);
+    startIndex = 1;
+  }
+
+  const normHex = (s) => {
+    if(!s) return '';
+    s = String(s).trim();
+    if(/^#[0-9A-Fa-f]{6}$/.test(s)) return s;
+    if(/^[0-9A-Fa-f]{6}$/.test(s)) return '#'+s;
+    return '';
+  };
+
+  for(let i=startIndex;i<lines.length;i++){
+    const cols = parseCSVRow(lines[i]);
+    if(!cols || cols.length===0) continue;
+    const firstName = cols[cFirst] || '';
+    const lastName  = cols[cLast]  || '';
+    const subjStr   = cols[cSubjects] || '';
+    const colorStr  = cols[cColor] || '';
+    const fullName  = normalizeTutorName(`${firstName} ${lastName}`.trim());
+    if(fullName){
+      tutorSubjectsMap.set(fullName, subjStr);
+      tutorSubjectsMapLower.set(normalizeLower(fullName), (subjStr||'').toLowerCase());
+      const hex = normHex(colorStr);
+      if(hex) tutorColorHex[fullName] = hex;
+      subjStr.split(/[;,/]/).map(s=>s.trim()).filter(Boolean).forEach(tok=>uniqueSubjectTokens.add(tok));
+    }
+  }
+}
 
       for(let i=startIndex;i<lines.length;i++){
         const cols = parseCSVRow(lines[i]);
@@ -423,7 +451,7 @@
         if(!tutor || !date) return;
 
         tutors.add(tutor);
-        if(!tutorColors[tutor]){ tutorColors[tutor]=colorSchemes[colorIndex%colorSchemes.length]; colorIndex++; }
+        if(!tutorColors[tutor]){ const hex=tutorColorHex[tutor]||tutorColorHex[normalizeTutorName(tutor)]||""; tutorColors[tutor]= hex || colorSchemes[colorIndex%colorSchemes.length]; colorIndex++; }
 
         if(slots && slots!=='Busy all day'){
           slots.split(",").forEach(slot=>{
