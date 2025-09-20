@@ -966,6 +966,7 @@
             background: #e53e3e;
             box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
         }
+
   .page-wrap { 
     display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px;
   }
@@ -976,9 +977,12 @@
   .header h1 { font-size: 2rem; color: #2d3748; }
   .rows { display: grid; grid-template-columns: 1fr; gap: 16px; }
   @media (min-width: 700px) { .rows { grid-template-columns: 1fr; } }
+
+  /* changed: add a 4th grid column for the right-side log */
   .row {
-    display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: start; padding: 14px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f9fafb;
+    display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px; align-items: start; padding: 14px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f9fafb;
   }
+
   .primary-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
     padding: 14px 18px; border-radius: 12px; border: 2px solid transparent; cursor: pointer;
@@ -993,6 +997,7 @@
   }
   .small-btn:hover { background: #e6edf7; transform: translateY(-1px); }
   .howto {
+    grid-column: 1 / -1; /* full width inside the row */
     display: none; background: #ffffff; border: 1px dashed #cbd5e0; border-radius: 12px; padding: 12px 14px; max-width: 520px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.06);
   }
@@ -1001,6 +1006,15 @@
   .howto ul { margin-left: 18px; }
   .howto li { margin: 6px 0; }
   .spacer { height: 4px; }
+
+  /* new: light-italic log */
+  .last-updated {
+    align-self: center;
+    font-style: italic;
+    color: #718096;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
   </style>
 </head>
 <body>
@@ -1014,8 +1028,9 @@
       <div class="rows">
         <!-- Row 1: Availabilities -->
         <div class="row">
-          <a class="primary-btn" href="https://docs.google.com/spreadsheets/d/1kA70FU2YGy5gTtkfFrlz2tsJ7-bDZ7Tm54gGQ0IUIUo/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">Availabilities</a>
+          <a class="primary-btn log-btn" href="https://docs.google.com/spreadsheets/d/1kA70FU2YGy5gTtkfFrlz2tsJ7-bDZ7Tm54gGQ0IUIUo/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" data-log="log-1">Availabilities</a>
           <button class="small-btn" data-target="howto-1">How-To</button>
+          <div class="last-updated" id="log-1">Last Updated/Clicked: never</div>
           <div class="howto" id="howto-1">
             <h4>Updating Availabilities</h4>
             <ul>
@@ -1029,8 +1044,9 @@
 
         <!-- Row 2: Subjects/Employees -->
         <div class="row">
-          <a class="primary-btn" href="https://docs.google.com/spreadsheets/d/1kA70FU2YGy5gTtkfFrlz2tsJ7-bDZ7Tm54gGQ0IUIUo/edit?gid=1392008086#gid=1392008086" target="_blank" rel="noopener noreferrer">Subjects/Employees</a>
+          <a class="primary-btn log-btn" href="https://docs.google.com/spreadsheets/d/1kA70FU2YGy5gTtkfFrlz2tsJ7-bDZ7Tm54gGQ0IUIUo/edit?gid=1392008086#gid=1392008086" target="_blank" rel="noopener noreferrer" data-log="log-2">Subjects/Employees</a>
           <button class="small-btn" data-target="howto-2">How-To</button>
+          <div class="last-updated" id="log-2">Last Updated/Clicked: never</div>
           <div class="howto" id="howto-2">
             <h4>Updating Subjects/Employees</h4>
             <ul>
@@ -1040,11 +1056,13 @@
             </ul>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
   <script>
+    // Toggle How-To sections
     document.addEventListener('click', function(e) { 
       if (e.target.matches('.small-btn')) { 
         const id = e.target.getAttribute('data-target');
@@ -1052,6 +1070,23 @@
         if (!panel) return;
         panel.classList.toggle('visible');
       }
+    });
+
+    // Helper: EST timestamp string
+    function getESTTimeString() {
+      const now = new Date();
+      return now.toLocaleString("en-US", { timeZone: "America/New_York" });
+    }
+
+    // Update the log when a main link is clicked
+    document.querySelectorAll('.log-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const logId = btn.getAttribute('data-log');
+        const logDiv = document.getElementById(logId);
+        if (logDiv) {
+          logDiv.textContent = "Last Updated/Clicked: " + getESTTimeString();
+        }
+      });
     });
   </script>
 </body>
