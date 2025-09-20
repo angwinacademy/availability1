@@ -17,27 +17,14 @@
     .header h1{color:#2d3748;font-size:2.8rem;font-weight:800;margin-bottom:15px;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .header p{color:#718096;font-size:1.1rem;font-weight:500}
 
-    /* (kept) settings gear in top-right of header */
-    .settings-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 1.6rem;
-      text-decoration: none;
-      background: rgba(255,255,255,0.85);
-      border-radius: 50%;
-      padding: 8px 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      transition: all 0.2s ease;
-      color:#2d3748;
+    /* settings gear */
+    .settings-btn{
+      position:absolute;top:15px;right:15px;font-size:1.6rem;text-decoration:none;background:rgba(255,255,255,.85);
+      border-radius:50%;padding:8px 10px;box-shadow:0 4px 10px rgba(0,0,0,.15);transition:all .2s ease;color:#2d3748
     }
-    .settings-btn:hover {
-      background: linear-gradient(135deg,#667eea,#764ba2);
-      color: #fff;
-      transform: rotate(90deg);
-    }
+    .settings-btn:hover{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;transform:rotate(90deg)}
 
-    .filters-container{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;margin-bottom:30px;box-shadow:0 15px 45px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow: visible}
+    .filters-container{background:rgba(255,255,255,.95);border-radius:20px;padding:30px;margin-bottom:30px;box-shadow:0 15px 45px rgba(0,0,0,.15);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);position:relative;overflow:visible}
     .filters-container::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(102,126,234,.03),rgba(118,75,162,.03));opacity:1}
     .filters-grid{display:grid;grid-template-columns:repeat(2,minmax(240px,1fr));gap:12px;position:relative;z-index:1}
     .filter-group label{display:block;font-weight:700;margin-bottom:12px;color:#2d3748;font-size:1.1rem}
@@ -77,40 +64,20 @@
     .tutor-legend{margin-top:25px;padding-top:25px;border-top:2px solid rgba(226,232,240,.3)}
     .legend-title{font-weight:700;color:#2d3748;margin-bottom:15px;font-size:1.1rem}
     .legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-    .legend-item{display:flex;align-items:center;gap:10px;font-weight:600;color:#4a5568;padding:8px 12px;background:rgba(248,250,252,.5);border-radius:8px;transition:all .2s ease;cursor:pointer;user-select:none}
+    .legend-item{display:flex;align-items:center;gap:10px;font-weight:600;color:#4a5568;padding:8px 12px;background:rgba(248,250,252,.5);border-radius:8px;transition:all .2s ease;cursor:pointer;user-select:none;outline:2px solid transparent}
     .legend-item:hover{background:rgba(248,250,252,.8);transform:translateY(-1px)}
+    .legend-item.selected{outline:2px solid rgba(102,126,234,.55);background:rgba(102,126,234,.08)}
     .legend-color{width:16px;height:16px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 
     /* suggestions */
-    .subject-suggestions{
-      position:absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      right: 0;
-      background:#fff;
-      border:1px solid rgba(226,232,240,.9);
-      border-radius:8px;
-      max-height:240px;
-      overflow-y:auto;
-      z-index:1000;
-      box-shadow:0 8px 20px rgba(0,0,0,.08);
-    }
-    .subject-suggestions .item{
-      padding:8px 12px;
-      cursor:pointer;
-      font-size:14px;
-    }
-    .subject-suggestions .item:hover,
-    .subject-suggestions .item.active{
-      background:rgba(248,250,252,.9);
-    }
+    .subject-suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid rgba(226,232,240,.9);border-radius:8px;max-height:240px;overflow-y:auto;z-index:1000;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    .subject-suggestions .item{padding:8px 12px;cursor:pointer;font-size:14px}
+    .subject-suggestions .item:hover,.subject-suggestions .item.active{background:rgba(248,250,252,.9)}
 
-    /* filters bar tweaks (kept) */
-    .filters-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .filters-bar .control, .filters-bar select, .filters-bar input, .filters-bar button { margin:0; vertical-align:middle; }
-    @media (max-width: 720px){ .filters-bar { gap: 6px; } }
-
-    .inline-flex-pair{ display:inline-flex; gap:8px; align-items:center; }
+    .filters-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .filters-bar .control,.filters-bar select,.filters-bar input,.filters-bar button{margin:0;vertical-align:middle}
+    @media (max-width:720px){.filters-bar{gap:6px}}
+    .inline-flex-pair{display:inline-flex;gap:8px;align-items:center}
   </style>
 </head>
 <body>
@@ -123,7 +90,6 @@
       <a href="settings.html" class="settings-btn" title="Settings" aria-label="Settings">⚙️</a>
     </div>
 
-    <!-- Filters -->
     <div class="filters-container">
       <div class="filters-grid">
         <div class="filter-group">
@@ -134,12 +100,12 @@
             </select>
             <button id="toggleTutor2" class="btn" type="button" title="Compare two tutors" style="padding:8px 10px">Add second tutor</button>
           </div>
-          <div class="filter-row" style="margin-top:8px; gap:8px;">
-            <select id="tutorFilter2" style="display:none; min-width:200px;">
+          <div class="filter-row" style="margin-top:8px;gap:8px;">
+            <select id="tutorFilter2" style="display:none;min-width:200px;">
               <option value="none">— Select second tutor —</option>
             </select>
             <button id="removeTutor2" class="btn" type="button" title="Remove second tutor" style="display:none;padding:6px 8px;width:34px;height:34px;line-height:1">×</button>
-            <span id="tutor2Hint" style="display:none; color:#718096; font-size:12px">compare tutors</span>
+            <span id="tutor2Hint" style="display:none;color:#718096;font-size:12px">compare tutors</span>
           </div>
         </div>
 
@@ -155,7 +121,6 @@
       </div>
     </div>
 
-    <!-- Calendar -->
     <div class="calendar-container">
       <div id="loadingOverlay" class="loading-overlay" style="display:none">
         <div class="loading-spinner"></div>
@@ -165,7 +130,7 @@
       <div id="calendar"></div>
 
       <div class="tutor-legend">
-        <div class="legend-title">👥 Tutor Color Legend</div>
+        <div class="legend-title">👥 Tutor Color Legend <span style="font-weight:500;color:#718096;font-size:.9rem">Tip: Shift-click to select multiple</span></div>
         <div id="tutorLegend" class="legend-grid"></div>
       </div>
     </div>
@@ -173,285 +138,268 @@
 
   <script>
     // === CONFIG ===
-    // 1) Availability CSV (unchanged; your existing published CSV for the Availabilities tab)
     const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
-
-    // 2) Subjects CSV: must point to the Subjects tab where column U has the hex color (Calendar Color).
-    //    Use the published-to-web CSV URL for the tab GID = 1392008086:
-    //    File → Share → Publish to web → Select the “Subjects” sheet → CSV.
-    //    Replace below with that CSV URL if different.
+    // Subjects tab published CSV (column U = Calendar Color; gid must match Subjects sheet)
     let subjectsCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vStfM_AuGTHtcz1JzK9zV5JwdFYe9fdtwyAwTt59uK6wbuIjhwHBndHsfXVoq_L8cJ27DFow0RKLSIn/pub?gid=1392008086&single=true&output=csv";
 
     // Globals
     let calendar;
     let allEvents = [];
-    // Single source of truth for colors (from Subjects!U only)
-    const tutorHexColor = {}; // { 'First Last': '#RRGGBB' }
-    // Subjects map (for searching/filtering)
+    const tutorHexColor = {}; // from Subjects!U (single source of truth)
     let tutorSubjectsMap = new Map();
     let tutorSubjectsMapLower = new Map();
     let uniqueSubjectTokens = new Set();
 
-    function updateConnectionStatus(status) {
+    // Shift-click multi-select state for legend
+    const multiSelectTutors = new Set();
+
+    function updateConnectionStatus(status){
       const statusDiv = document.getElementById('connectionStatus');
       statusDiv.className = `connection-status ${status}`;
-      if (status === 'connected') {
-        statusDiv.innerHTML = '✅ Calendar loaded successfully';
-        setTimeout(() => { statusDiv.style.opacity = '0.7'; }, 3000);
-      } else if (status === 'error') {
-        statusDiv.innerHTML = '⚠️ Failed to load data';
-      } else {
-        statusDiv.innerHTML = '🔄 Loading calendar...';
-      }
+      if(status==='connected'){ statusDiv.innerHTML='✅ Calendar loaded successfully'; setTimeout(()=>{statusDiv.style.opacity='0.7';},3000); }
+      else if(status==='error'){ statusDiv.innerHTML='⚠️ Failed to load data'; }
+      else{ statusDiv.innerHTML='🔄 Loading calendar...'; }
     }
     function showLoading(){ document.getElementById('loadingOverlay').style.display='flex'; }
     function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
     function showError(message){
-      const calendarContainer = document.querySelector('.calendar-container');
-      const errorDiv = document.createElement('div');
+      const calendarContainer=document.querySelector('.calendar-container');
+      const errorDiv=document.createElement('div');
       errorDiv.className='error-message';
-      errorDiv.innerHTML = `<strong>⚠️ Error</strong><br>${message}<br><small>Please refresh and try again.</small>`;
-      calendarContainer.insertBefore(errorDiv, calendarContainer.firstChild);
+      errorDiv.innerHTML=`<strong>⚠️ Error</strong><br>${message}<br><small>Please refresh and try again.</small>`;
+      calendarContainer.insertBefore(errorDiv,calendarContainer.firstChild);
     }
 
-    // --- CSV helpers ---
+    // CSV helpers
     function parseCSVRow(row){
-      const result=[]; let current=''; let inQuotes=false;
+      const result=[];let current='';let inQuotes=false;
       for(let i=0;i<row.length;i++){
-        const c=row[i], next=row[i+1];
-        if(c==='"'){
-          if(inQuotes && next==='"'){ current+='"'; i++; }
-          else { inQuotes=!inQuotes; }
-        } else if(c===',' && !inQuotes){ result.push(current.trim()); current=''; }
+        const c=row[i],next=row[i+1];
+        if(c==='"'){ if(inQuotes && next==='"'){ current+='"'; i++; } else { inQuotes=!inQuotes; } }
+        else if(c===',' && !inQuotes){ result.push(current.trim()); current=''; }
         else { current+=c; }
       }
       result.push(current.trim());
       return result;
     }
     async function fetchCSV(url){
-      const res = await fetch(url);
+      const res=await fetch(url);
       if(!res.ok) throw new Error(`HTTP ${res.status} loading ${url}`);
       return res.text();
     }
     function indexByHeader(headers, wantedNames, fallbackIndex){
       if(headers && headers.length){
-        const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
-        const table = new Map(headers.map((h,idx)=>[norm(h), idx]));
-        for(const w of wantedNames){
-          const idx = table.get(norm(w));
-          if(idx!=null) return idx;
-        }
+        const norm=s=>s.trim().toLowerCase().replace(/\s+/g,'');
+        const table=new Map(headers.map((h,idx)=>[norm(h),idx]));
+        for(const w of wantedNames){ const idx=table.get(norm(w)); if(idx!=null) return idx; }
       }
       return fallbackIndex;
     }
-    function normalizeTutorName(name){
-      return (name||'').trim().replace(/\s+/g,' ');
-    }
+    function normalizeTutorName(name){ return (name||'').trim().replace(/\s+/g,' '); }
     function normalizeLower(name){ return normalizeTutorName(name).toLowerCase(); }
 
-    // --- Subjects + Colors (single source) ---
+    // Load Subjects & Colors (single source from column U)
     async function loadSubjectsAndColors(){
       if(!subjectsCSV) return;
       try{
-        const text = await fetchCSV(subjectsCSV);
-        const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
+        const text=await fetchCSV(subjectsCSV);
+        const lines=text.split(/\r?\n/).filter(l=>l.trim().length>0);
         if(lines.length===0) return;
-
-        const first = parseCSVRow(lines[0]);
-        const looksLikeHeader = first.some(cell => /first|last|subject|color/i.test(cell));
-        let startIndex = 0;
-        // Defaults if no header present (0-based): C=2 First, D=3 Last, T=19 Subjects, U=20 Calendar Color
-        let cFirst=2, cLast=3, cSubjects=19, cColor=20;
-
-        if(looksLikeHeader){
-          const headers = first;
-          cFirst   = indexByHeader(headers, ['First Name','First','Tutor First','TutorFirst','FirstName'], 2);
-          cLast    = indexByHeader(headers,  ['Last Name','Last','Tutor Last','TutorLast','LastName'],   3);
-          cSubjects= indexByHeader(headers,  ['Subjects','Subject','Tutoring Subjects','Tutor Subjects'], 19);
-          cColor   = indexByHeader(headers,  ['Calendar Color','Color','Event Color'],                   20);
-          startIndex = 1;
+        const first=parseCSVRow(lines[0]);
+        const hasHeader=first.some(cell=>/first|last|subject|color/i.test(cell));
+        let startIndex=0;
+        // C=2 First, D=3 Last, T=19 Subjects, U=20 Calendar Color (0-based)
+        let cFirst=2,cLast=3,cSubjects=19,cColor=20;
+        if(hasHeader){
+          const headers=first;
+          cFirst=indexByHeader(headers,['First Name','First','Tutor First','TutorFirst','FirstName'],2);
+          cLast=indexByHeader(headers,['Last Name','Last','Tutor Last','TutorLast','LastName'],3);
+          cSubjects=indexByHeader(headers,['Subjects','Subject','Tutoring Subjects','Tutor Subjects'],19);
+          cColor=indexByHeader(headers,['Calendar Color','Color','Event Color'],20);
+          startIndex=1;
         }
-
-        const normHex = (s) => {
+        const normHex=(s)=>{
           if(!s) return '';
-          s = String(s).trim();
+          s=String(s).trim();
           if(/^#[0-9A-Fa-f]{6}$/.test(s)) return s.toUpperCase();
-          if(/^[0-9A-Fa-f]{6}$/.test(s))  return ('#'+s).toUpperCase();
+          if(/^[0-9A-Fa-f]{6}$/.test(s)) return ('#'+s).toUpperCase();
           return '';
         };
-
         for(let i=startIndex;i<lines.length;i++){
-          const cols = parseCSVRow(lines[i]);
-          if(!cols || cols.length===0) continue;
-          const firstName = cols[cFirst] || '';
-          const lastName  = cols[cLast]  || '';
-          const subjStr   = cols[cSubjects] || '';
-          const colorStr  = cols[cColor] || '';
-          const fullName  = normalizeTutorName(`${firstName} ${lastName}`.trim());
-          const hex       = normHex(colorStr);
-
+          const cols=parseCSVRow(lines[i]);
+          const firstName=cols[cFirst]||'';
+          const lastName=cols[cLast]||'';
+          const subjStr=cols[cSubjects]||'';
+          const colorStr=cols[cColor]||'';
+          const fullName=normalizeTutorName(`${firstName} ${lastName}`.trim());
+          const hex=normHex(colorStr);
           if(fullName){
-            // build subject maps (for search/filter)
-            tutorSubjectsMap.set(fullName, subjStr);
-            tutorSubjectsMapLower.set(normalizeLower(fullName), (subjStr||"").toLowerCase());
+            tutorSubjectsMap.set(fullName,subjStr);
+            tutorSubjectsMapLower.set(normalizeLower(fullName),(subjStr||'').toLowerCase());
             subjStr.split(/[;,/]/).map(s=>s.trim()).filter(Boolean).forEach(tok=>uniqueSubjectTokens.add(tok));
-            // set color if valid hex; otherwise leave undefined (we’ll fallback to a safe default later)
-            if(hex) tutorHexColor[fullName] = hex;
+            if(hex) tutorHexColor[fullName]=hex;
           }
         }
-      }catch(err){
-        console.warn('Subjects CSV failed to load:', err.message);
-      }
+      }catch(err){ console.warn('Subjects CSV failed to load:',err.message); }
     }
 
-    // --- Legend ---
+    // Legend
     function createTutorLegend(tutors){
-      const legendContainer = document.getElementById('tutorLegend');
-      legendContainer.innerHTML='';
+      const legend=document.getElementById('tutorLegend');
+      legend.innerHTML='';
       tutors.forEach(tutor=>{
-        const item=document.createElement('div'); item.className='legend-item'; item.dataset.tutor = tutor;
-        const colorBox=document.createElement('div'); colorBox.className='legend-color';
-        colorBox.style.background = getHexForTutor(tutor);
+        const item=document.createElement('div'); item.className='legend-item'; item.dataset.tutor=tutor;
+        const color=document.createElement('div'); color.className='legend-color'; color.style.background=getHexForTutor(tutor);
         const label=document.createElement('span'); label.textContent=tutor;
-        item.appendChild(colorBox); item.appendChild(label);
-        legendContainer.appendChild(item);
+        item.appendChild(color); item.appendChild(label); legend.appendChild(item);
 
-        // Left click: mirror dropdown selection
-        item.addEventListener('click', () => {
-          const tutorSelect = document.getElementById('tutorFilter');
-          if (tutorSelect){
-            tutorSelect.value = tutor;
+        item.addEventListener('click',(e)=>{
+          if(e.shiftKey){
+            // Toggle multi-select membership
+            if(multiSelectTutors.has(tutor)) multiSelectTutors.delete(tutor); else multiSelectTutors.add(tutor);
+            updateLegendSelectionUI();
+            applyFiltersUI(); // will respect multi-select
+          }else{
+            // Single-select behavior, mirror dropdown
+            multiSelectTutors.clear();
+            updateLegendSelectionUI();
+            const sel=document.getElementById('tutorFilter');
+            if(sel){ sel.value=tutor; }
             applyFiltersUI();
-            document.getElementById('calendar')?.scrollIntoView({behavior:'smooth', block:'start'});
+            document.getElementById('calendar')?.scrollIntoView({behavior:'smooth',block:'start'});
           }
         });
+      });
+    }
+    function updateLegendSelectionUI(){
+      document.querySelectorAll('.legend-item').forEach(el=>{
+        const t=el.dataset.tutor;
+        if(multiSelectTutors.size>0 && multiSelectTutors.has(t)) el.classList.add('selected');
+        else el.classList.remove('selected');
       });
     }
     function refreshLegendColors(){
       document.querySelectorAll('.legend-item').forEach(item=>{
-        const t = item.dataset.tutor;
-        const box = item.querySelector('.legend-color');
-        if (box) box.style.background = getHexForTutor(t);
+        const t=item.dataset.tutor; const box=item.querySelector('.legend-color');
+        if(box) box.style.background=getHexForTutor(t);
       });
     }
 
-    // --- Calendar coloring (single source) ---
+    // Colors
     function getHexForTutor(name){
-      const n = normalizeTutorName(name);
-      return tutorHexColor[n] || '#667EEA'; // safe default if no hex present
+      const n=normalizeTutorName(name);
+      return tutorHexColor[n] || '#667EEA'; // fallback if missing in sheet
     }
     function applyTutorColors(){
-      // Style all events via a single dynamic stylesheet using data-tutor exact match
-      let styleEl = document.getElementById('tutorColorStyles');
-      if(!styleEl){
-        styleEl = document.createElement('style');
-        styleEl.id = 'tutorColorStyles';
-        document.head.appendChild(styleEl);
-      }
-      const tutors = Object.keys(tutorMapFromEvents());
-      let css = '';
-      tutors.forEach(t => {
-        const color = getHexForTutor(t);
-        const safe  = CSS.escape ? CSS.escape(t) : t.replace(/["\\]/g, '\\$&');
-        css += `.fc-event[data-tutor="${safe}"]{background:${color}!important;border:none!important;color:#fff}\n`;
+      let styleEl=document.getElementById('tutorColorStyles');
+      if(!styleEl){ styleEl=document.createElement('style'); styleEl.id='tutorColorStyles'; document.head.appendChild(styleEl); }
+      const tutors=Object.keys(tutorMapFromEvents());
+      let css='';
+      tutors.forEach(t=>{
+        const color=getHexForTutor(t);
+        const safe=CSS.escape?CSS.escape(t):t.replace(/["\\]/g,'\\$&');
+        css+=`.fc-event[data-tutor="${safe}"]{background:${color}!important;border:none!important;color:#fff}\n`;
       });
-      styleEl.textContent = css;
+      styleEl.textContent=css;
     }
     function tutorMapFromEvents(){
-      const map = {};
-      if (!calendar) return map;
-      const evts = calendar.getEvents();
-      for (let i=0;i<evts.length;i++){
-        const t = normalizeTutorName(evts[i].extendedProps.tutor || '');
-        if(t) map[t]=true;
-      }
+      const map={}; if(!calendar) return map;
+      const evts=calendar.getEvents();
+      for(let i=0;i<evts.length;i++){ const t=normalizeTutorName(evts[i].extendedProps.tutor||''); if(t) map[t]=true; }
       return map;
     }
 
-    // --- Filters / subject search ---
+    // Filters
     function applyFiltersUI(){
-      const tutorSelect  = document.getElementById('tutorFilter');
-      const tutorSelect2 = document.getElementById('tutorFilter2');
-      const subjectInput = document.getElementById('subjectFilter');
+      const tutorSelect=document.getElementById('tutorFilter');
+      const tutorSelect2=document.getElementById('tutorFilter2');
+      const subjectInput=document.getElementById('subjectFilter');
 
-      const t1 = tutorSelect ? tutorSelect.value : 'all';
-      const t2Visible = tutorSelect2 && tutorSelect2.style.display !== 'none';
-      const t2 = (t2Visible && tutorSelect2.value && tutorSelect2.value !== 'none') ? tutorSelect2.value : null;
+      // If multi-select is active, override dropdown logic entirely
+      const multiActive = multiSelectTutors.size>0;
 
-      const q = (subjectInput?.value || '').trim().toLowerCase();
-      const doSubject = q.length >= 1;
+      const t1 = !multiActive && tutorSelect ? tutorSelect.value : 'all';
+      const t2Visible = !multiActive && tutorSelect2 && tutorSelect2.style.display!=='none';
+      const t2 = (!multiActive && t2Visible && tutorSelect2.value && tutorSelect2.value!=='none') ? tutorSelect2.value : null;
 
-      let allowedLower = null;
-      if (doSubject && tutorSubjectsMapLower.size > 0) {
-        allowedLower = new Set();
-        tutorSubjectsMapLower.forEach((subjectsLower, tutorLowerName) => {
-          if (subjectsLower.includes(q)) allowedLower.add(tutorLowerName);
-        });
+      const q=(subjectInput?.value||'').trim().toLowerCase();
+      const doSubject=q.length>=1;
+      let allowedLower=null;
+      if(doSubject && tutorSubjectsMapLower.size>0){
+        allowedLower=new Set();
+        tutorSubjectsMapLower.forEach((subjectsLower,tutorLowerName)=>{ if(subjectsLower.includes(q)) allowedLower.add(tutorLowerName); });
       }
 
-      if (!window.calendar) return;
+      if(!window.calendar) return;
 
-      calendar.batchRendering(() => {
-        const evts = calendar.getEvents();
-        for (let i=0; i<evts.length; i++) {
-          const evt = evts[i];
-          const tutor = evt.extendedProps.tutor || '';
-          const tutorLower = (evt.extendedProps.tutorLower || tutor.toLowerCase());
+      calendar.batchRendering(()=>{
+        const evts=calendar.getEvents();
+        for(let i=0;i<evts.length;i++){
+          const evt=evts[i];
+          const tutor=evt.extendedProps.tutor||'';
+          const tutorLower=(evt.extendedProps.tutorLower || tutor.toLowerCase());
+          let ok=true;
 
-          let ok = true;
-          if (t1 !== 'all' && !t2) ok = (tutor === t1);
-          else if (t1 !== 'all' && t2) ok = (tutor === t1 || tutor === t2);
-          else if (t1 === 'all' && t2) ok = (tutor === t2);
+          if(multiActive){
+            ok = multiSelectTutors.has(tutor);
+          }else{
+            if(t1!=='all' && !t2) ok = (tutor===t1);
+            else if(t1!=='all' && t2) ok = (tutor===t1 || tutor===t2);
+            else if(t1==='all' && t2) ok = (tutor===t2);
+          }
 
-          if (ok && doSubject && allowedLower) ok = allowedLower.has(tutorLower);
-
+          if(ok && doSubject && allowedLower) ok = allowedLower.has(tutorLower);
           evt.setProp('display', ok ? 'auto' : 'none');
         }
       });
 
-      // Emphasize selected tutor in legend
-      const legendItems = document.querySelectorAll('.legend-item');
-      for (let i=0; i<legendItems.length; i++){
-        const item = legendItems[i];
-        const name = item.dataset.tutor;
-        let match = (t1 === 'all' || name === t1);
-        item.style.opacity = match ? '1' : '0.35';
+      // Legend emphasis: if multi-select, highlight selected; otherwise emphasize dropdown selection
+      const legendItems=document.querySelectorAll('.legend-item');
+      if(multiActive){
+        legendItems.forEach(item=>{
+          const name=item.dataset.tutor;
+          item.style.opacity = multiSelectTutors.has(name) ? '1' : '0.35';
+        });
+      }else{
+        const t1cur = tutorSelect ? tutorSelect.value : 'all';
+        legendItems.forEach(item=>{
+          const name=item.dataset.tutor;
+          item.style.opacity = (t1cur==='all' || name===t1cur) ? '1' : '0.35';
+        });
       }
     }
 
-    // --- Availability loader ---
+    // Availability
     async function loadAvailability(){
-      const text = await fetchCSV(sheetCSV);
-      const rows = text.split("\n").slice(1); // skip header
+      const text=await fetchCSV(sheetCSV);
+      const rows=text.split("\n").slice(1);
       let events=[], tutors=new Set();
 
       rows.forEach(row=>{
         if(!row.trim()) return;
-        const cols = parseCSVRow(row);
+        const cols=parseCSVRow(row);
         if(cols.length<3) return;
 
-        const tutor = normalizeTutorName((cols[0]||'').trim());
-        const date  = (cols[1]||'').trim();
-        const slots = (cols[2]||'').trim();
+        const tutor=normalizeTutorName((cols[0]||'').trim());
+        const date=(cols[1]||'').trim();
+        const slots=(cols[2]||'').trim();
         if(!tutor || !date) return;
 
         tutors.add(tutor);
 
         if(slots && slots!=='Busy all day'){
           slots.split(",").forEach(slot=>{
-            const timeRange = slot.trim();
+            const timeRange=slot.trim();
             if(timeRange.includes("-")){
-              const [startTime,endTime] = timeRange.split("-").map(t=>t.trim());
+              const [startTime,endTime]=timeRange.split("-").map(t=>t.trim());
               if(startTime && endTime){
                 events.push({
                   title:`${tutor} - Available`,
                   start:`${date}T${startTime}`,
                   end:`${date}T${endTime}`,
-                  extendedProps:{ tutor, tutorLower: tutor.toLowerCase(), timeSlot:timeRange, originalSlots:slots },
-                  backgroundColor:'transparent',
-                  borderColor:'transparent',
-                  className:'tutor-event',
-                  display:'block'
+                  extendedProps:{ tutor, tutorLower:tutor.toLowerCase(), timeSlot:timeRange, originalSlots:slots },
+                  backgroundColor:'transparent', borderColor:'transparent',
+                  className:'tutor-event', display:'block'
                 });
               }
             }
@@ -462,81 +410,63 @@
       return {events, tutors: Array.from(tutors)};
     }
 
-    // --- Suggestions (unchanged logic) ---
-    function debounce(fn, delay=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); }; }
+    // Suggestions
+    function debounce(fn,delay=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),delay); }; }
     function updateSubjectSuggestions(query){
-      const box = document.getElementById('subjectSuggestions');
-      if(!box) return;
-      const q = (query||'').trim().toLowerCase();
-      if(q.length < 1 || uniqueSubjectTokens.size === 0){ box.style.display='none'; box.innerHTML=''; return; }
-      const items = [];
-      const maxItems = 50;
-      const arr = Array.from(uniqueSubjectTokens);
-      let count = 0;
-      for(let i=0;i<arr.length;i++){
-        const tok = arr[i];
-        if(tok && tok.toLowerCase().startsWith(q)){
-          items.push(tok);
-          if(++count >= maxItems) break;
-        }
-      }
+      const box=document.getElementById('subjectSuggestions'); if(!box) return;
+      const q=(query||'').trim().toLowerCase();
+      if(q.length<1 || uniqueSubjectTokens.size===0){ box.style.display='none'; box.innerHTML=''; return; }
+      const items=[]; const maxItems=50; const arr=Array.from(uniqueSubjectTokens); let count=0;
+      for(let i=0;i<arr.length;i++){ const tok=arr[i]; if(tok && tok.toLowerCase().startsWith(q)){ items.push(tok); if(++count>=maxItems) break; } }
       if(!items.length){ box.style.display='none'; box.innerHTML=''; return; }
-      box.innerHTML = items.map(t => `<div class="item" data-val="${t.replace(/"/g,'&quot;')}">${t}</div>`).join('');
+      box.innerHTML=items.map(t=>`<div class="item" data-val="${t.replace(/"/g,'&quot;')}">${t}</div>`).join('');
       box.style.display='block';
-      box.querySelectorAll('.item').forEach(el => {
-        el.addEventListener('click', () => {
-          const subjectInput = document.getElementById('subjectFilter');
-          subjectInput.value = el.getAttribute('data-val');
-          hideSubjectSuggestions();
+      box.querySelectorAll('.item').forEach(el=>{
+        el.addEventListener('click',()=>{
+          const subjectInput=document.getElementById('subjectFilter');
+          subjectInput.value=el.getAttribute('data-val'); hideSubjectSuggestions();
         });
       });
-      const first = box.querySelector('.item');
-      if(first){ first.classList.add('active'); }
+      const first=box.querySelector('.item'); if(first){ first.classList.add('active'); }
     }
-    function hideSubjectSuggestions(){
-      const box = document.getElementById('subjectSuggestions');
-      if(box){ box.style.display='none'; box.innerHTML=''; }
-    }
+    function hideSubjectSuggestions(){ const box=document.getElementById('subjectSuggestions'); if(box){ box.style.display='none'; box.innerHTML=''; } }
 
-    // --- Init ---
+    // Init
     document.addEventListener("DOMContentLoaded", async function(){
       try{
         updateConnectionStatus('loading'); showLoading();
 
-        // 1) Load Subjects (build subject maps + tutor hex colors)
+        // 1) Load Subjects (build subject maps + hex colors)
         await loadSubjectsAndColors();
 
-        // 2) Load Availability (now colors already known)
-        const {events, tutors} = await loadAvailability();
-        allEvents = events;
+        // 2) Load Availability (colors already known)
+        const {events, tutors}=await loadAvailability();
+        allEvents=events;
 
-        // Populate tutor dropdowns
-        const tutorFilter = document.getElementById('tutorFilter');
+        // Dropdowns
+        const tutorFilter=document.getElementById('tutorFilter');
         tutors.forEach(tutor=>{
-          const opt=document.createElement('option');
-          opt.value=tutor; opt.textContent=tutor;
-          tutorFilter.appendChild(opt);
+          const opt=document.createElement('option'); opt.value=tutor; opt.textContent=tutor; tutorFilter.appendChild(opt);
         });
 
-        // Build legend and apply CSS colors from single source
+        // Legend + colors
         createTutorLegend(tutors);
 
-        // Init calendar
-        const calendarEl = document.getElementById("calendar");
-        calendar = new FullCalendar.Calendar(calendarEl,{
-          initialView: window.innerWidth<768 ? 'listWeek':'timeGridWeek',
-          headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+        // Calendar
+        const calendarEl=document.getElementById("calendar");
+        calendar=new FullCalendar.Calendar(calendarEl,{
+          initialView:window.innerWidth<768?'listWeek':'timeGridWeek',
+          headerToolbar:{left:'prev,next today',center:'title',right:'dayGridMonth,timeGridWeek,timeGridDay,listWeek'},
           height:'auto',
-          events: events,
-          slotMinTime: '07:00:00',
-          slotMaxTime: '23:00:00',
+          events:events,
+          slotMinTime:'07:00:00',
+          slotMaxTime:'23:00:00',
           eventDidMount(info){
-            const tutor = normalizeTutorName(info.event.extendedProps.tutor);
-            info.el.setAttribute('data-tutor', tutor); // used by CSS to colorize
-            info.el.style.background = getHexForTutor(tutor);
-            info.el.style.borderColor = getHexForTutor(tutor);
-            info.el.style.color = '#fff';
-            info.el.setAttribute('title', `${tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
+            const tutor=normalizeTutorName(info.event.extendedProps.tutor);
+            info.el.setAttribute('data-tutor',tutor);
+            const hex=getHexForTutor(tutor);
+            info.el.style.background=hex; info.el.style.borderColor=hex; info.el.style.color='#fff';
+            info.el.setAttribute('title',`${tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
           },
           eventClick(info){
             alert(`Book with ${info.event.extendedProps.tutor}\nTime: ${info.event.extendedProps.timeSlot}`);
@@ -545,100 +475,84 @@
         });
         calendar.render();
 
-        // After events are in the DOM, also install stylesheet (helps if events re-render)
         applyTutorColors();
         refreshLegendColors();
+        updateLegendSelectionUI();
 
-        // Wire up filters
-        tutorFilter.addEventListener('change', applyFiltersUI);
-
-        const subjectInput = document.getElementById('subjectFilter');
-        const applyBtn     = document.getElementById('applySubject');
-        const clearBtn     = document.getElementById('clearSubject');
-        const suggBox      = document.getElementById('subjectSuggestions');
-        const tutorFilter2 = document.getElementById('tutorFilter2');
-        const toggleTutor2 = document.getElementById('toggleTutor2');
-        const removeTutor2 = document.getElementById('removeTutor2');
-        const tutor2Hint   = document.getElementById('tutor2Hint');
-
-        applyBtn.addEventListener('click', () => { applyFiltersUI(); hideSubjectSuggestions(); });
-        subjectInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); applyFiltersUI(); hideSubjectSuggestions(); }
-          else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            const items = Array.from(document.querySelectorAll('#subjectSuggestions .item'));
-            if (!items.length) return;
-            e.preventDefault();
-            let idx = items.findIndex(el => el.classList.contains('active'));
-            if (e.key === 'ArrowDown') idx = (idx + 1) % items.length;
-            if (e.key === 'ArrowUp')   idx = (idx <= 0 ? items.length - 1 : idx - 1);
-            items.forEach(el => el.classList.remove('active'));
-            items[idx].classList.add('active');
-            items[idx].scrollIntoView({block:'nearest'});
-            subjectInput.value = items[idx].getAttribute('data-val');
-          }
-        });
-        subjectInput.addEventListener('input', debounce((e) => { updateSubjectSuggestions(e.target.value); }, 150));
-        subjectInput.addEventListener('focus', (e) => { updateSubjectSuggestions(e.target.value); });
-        clearBtn.addEventListener('click', () => {
-          subjectInput.value = '';
-          hideSubjectSuggestions();
-          if ('requestIdleCallback' in window) { requestIdleCallback(() => applyFiltersUI(), {timeout: 200}); }
-          else { setTimeout(() => applyFiltersUI(), 0); }
-        });
-
-        // Second tutor toggle
-        toggleTutor2.addEventListener('click', () => {
-          if (tutorFilter2.style.display === 'none') {
-            tutorFilter2.style.display = 'inline-block';
-            removeTutor2.style.display = 'inline-flex';
-            tutor2Hint.style.display   = 'inline';
-            if (tutorFilter2.options.length <= 1) {
-              for (let i=0;i<tutorFilter.options.length;i++){
-                const opt = tutorFilter.options[i].cloneNode(true);
-                tutorFilter2.appendChild(opt);
-              }
-            }
-            toggleTutor2.textContent = 'Second tutor added';
-            toggleTutor2.disabled = true;
-          }
-        });
-        removeTutor2.addEventListener('click', () => {
-          tutorFilter2.value = 'none';
-          tutorFilter2.style.display = 'none';
-          removeTutor2.style.display = 'none';
-          tutor2Hint.style.display   = 'none';
-          toggleTutor2.textContent = 'Add second tutor';
-          toggleTutor2.disabled = false;
+        // Wire filters
+        tutorFilter.addEventListener('change', ()=>{
+          // Changing dropdown cancels multi-select mode
+          multiSelectTutors.clear();
+          updateLegendSelectionUI();
           applyFiltersUI();
         });
-        tutorFilter2.addEventListener('change', applyFiltersUI);
 
-        // Close suggestions when clicking outside
-        document.addEventListener('click', (e) => {
-          if (!suggBox) return;
-          const within = suggBox.contains(e.target) || e.target === subjectInput;
-          if (!within) hideSubjectSuggestions();
+        const subjectInput=document.getElementById('subjectFilter');
+        const applyBtn=document.getElementById('applySubject');
+        const clearBtn=document.getElementById('clearSubject');
+        const suggBox=document.getElementById('subjectSuggestions');
+        const tutorFilter2=document.getElementById('tutorFilter2');
+        const toggleTutor2=document.getElementById('toggleTutor2');
+        const removeTutor2=document.getElementById('removeTutor2');
+        const tutor2Hint=document.getElementById('tutor2Hint');
+
+        applyBtn.addEventListener('click',()=>{ applyFiltersUI(); hideSubjectSuggestions(); });
+        subjectInput.addEventListener('keydown',(e)=>{
+          if(e.key==='Enter'){ e.preventDefault(); applyFiltersUI(); hideSubjectSuggestions(); }
+          else if(e.key==='ArrowDown' || e.key==='ArrowUp'){
+            const items=Array.from(document.querySelectorAll('#subjectSuggestions .item')); if(!items.length) return;
+            e.preventDefault();
+            let idx=items.findIndex(el=>el.classList.contains('active'));
+            if(e.key==='ArrowDown') idx=(idx+1)%items.length;
+            if(e.key==='ArrowUp')   idx=(idx<=0?items.length-1:idx-1);
+            items.forEach(el=>el.classList.remove('active')); items[idx].classList.add('active'); items[idx].scrollIntoView({block:'nearest'});
+            subjectInput.value=items[idx].getAttribute('data-val');
+          }
+        });
+        subjectInput.addEventListener('input',debounce(e=>{ updateSubjectSuggestions(e.target.value); },150));
+        subjectInput.addEventListener('focus',e=>{ updateSubjectSuggestions(e.target.value); });
+        clearBtn.addEventListener('click',()=>{
+          subjectInput.value=''; hideSubjectSuggestions();
+          if('requestIdleCallback' in window){ requestIdleCallback(()=>applyFiltersUI(),{timeout:200}); } else { setTimeout(()=>applyFiltersUI(),0); }
         });
 
-        // Responsive view change
-        function handleResize(){
-          const view = window.innerWidth<768 ? 'listWeek':'timeGridWeek';
-          if (calendar.view.type !== view) calendar.changeView(view);
-        }
-        window.addEventListener('resize', handleResize);
+        // Second tutor toggle (unchanged)
+        toggleTutor2.addEventListener('click',()=>{
+          if(tutorFilter2.style.display==='none'){
+            tutorFilter2.style.display='inline-block'; removeTutor2.style.display='inline-flex'; tutor2Hint.style.display='inline';
+            if(tutorFilter2.options.length<=1){
+              for(let i=0;i<tutorFilter.options.length;i++){ const opt=tutorFilter.options[i].cloneNode(true); tutorFilter2.appendChild(opt); }
+            }
+            toggleTutor2.textContent='Second tutor added'; toggleTutor2.disabled=true;
+          }
+        });
+        removeTutor2.addEventListener('click',()=>{
+          tutorFilter2.value='none'; tutorFilter2.style.display='none'; removeTutor2.style.display='none'; tutor2Hint.style.display='none';
+          toggleTutor2.textContent='Add second tutor'; toggleTutor2.disabled=false; applyFiltersUI();
+        });
+        tutorFilter2.addEventListener('change',applyFiltersUI);
+
+        // Close suggestions on outside click
+        document.addEventListener('click',(e)=>{
+          if(!suggBox) return;
+          const within=suggBox.contains(e.target)||e.target===subjectInput;
+          if(!within) hideSubjectSuggestions();
+        });
+
+        // Responsive view
+        function handleResize(){ const v=window.innerWidth<768?'listWeek':'timeGridWeek'; if(calendar.view.type!==v) calendar.changeView(v); }
+        window.addEventListener('resize',handleResize);
 
         updateConnectionStatus('connected');
       }catch(err){
         console.error(err);
         updateConnectionStatus('error');
         showError(err.message||'Failed to initialize calendar.');
-      }finally{
-        hideLoading();
-      }
+      }finally{ hideLoading(); }
     });
 
-    // Shortcuts (kept)
-    document.addEventListener('keydown', function(e){
+    // Shortcuts
+    document.addEventListener('keydown',function(e){
       if(!calendar) return;
       if(e.key==='ArrowLeft' && e.ctrlKey){ e.preventDefault(); calendar.prev(); }
       else if(e.key==='ArrowRight' && e.ctrlKey){ e.preventDefault(); calendar.next(); }
@@ -648,35 +562,31 @@
     document.documentElement.style.scrollBehavior='smooth';
     if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ document.body.classList.add('dark-theme'); }
   </script>
+
   <script>
-  /* v9: Subject auto-apply and convert container to .filters-bar (kept) */
-  (function(){
-    const f1 = document.getElementById('tutorFilter');
-    const f2 = document.getElementById('tutorFilter2');
-    const subj = document.getElementById('subjectFilter');
-    const searchBtn = document.getElementById('searchBtn');
+    /* v9: Subject auto-apply + filters bar (kept) */
+    (function(){
+      const f1=document.getElementById('tutorFilter');
+      const f2=document.getElementById('tutorFilter2');
+      const subj=document.getElementById('subjectFilter');
+      const searchBtn=document.getElementById('searchBtn');
 
-    const container = (function(){
-      if (f1 && f2 && subj) {
-        let p = f1.parentElement;
-        while (p && !(p.contains(f1) && p.contains(f2) && p.contains(subj))) p = p.parentElement;
-        return p || (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
+      const container=(function(){
+        if(f1 && f2 && subj){
+          let p=f1.parentElement;
+          while(p && !(p.contains(f1) && p.contains(f2) && p.contains(subj))) p=p.parentElement;
+          return p || (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
+        }
+        return (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
+      })();
+      if(container && !container.classList.contains('filters-bar')) container.classList.add('filters-bar');
+
+      if(subj){
+        const trigger=()=>{ if(typeof applyFiltersUI==='function') applyFiltersUI(); else if(searchBtn) searchBtn.click(); };
+        subj.addEventListener('change',trigger);
+        subj.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); trigger(); }});
       }
-      return (f1 && f1.parentElement) || (subj && subj.parentElement) || null;
     })();
-    if (container && !container.classList.contains('filters-bar')) container.classList.add('filters-bar');
-
-    if (subj) {
-      const trigger = () => {
-        if (typeof applyFiltersUI === 'function') applyFiltersUI();
-        else if (searchBtn) searchBtn.click();
-      };
-      subj.addEventListener('change', trigger);
-      subj.addEventListener('keydown', function(e){
-        if (e.key === 'Enter') { e.preventDefault(); trigger(); }
-      });
-    }
-  })();
   </script>
 </body>
 </html>
