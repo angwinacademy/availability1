@@ -78,6 +78,110 @@
     .filters-bar .control,.filters-bar select,.filters-bar input,.filters-bar button{margin:0;vertical-align:middle}
     @media (max-width:720px){.filters-bar{gap:6px}}
     .inline-flex-pair{display:inline-flex;gap:8px;align-items:center}
+
+    /* Email Blast Button */
+    .email-blast-btn{
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      color:#fff;border:none;border-radius:16px;
+      padding:12px 24px;font-weight:700;font-size:1rem;
+      cursor:pointer;box-shadow:0 6px 20px rgba(102,126,234,.4);
+      transition:all .3s ease;display:inline-flex;align-items:center;gap:8px;
+      animation:emailPulse 2s ease-in-out infinite;
+      white-space:nowrap;
+    }
+    @keyframes emailPulse{0%,100%{box-shadow:0 6px 20px rgba(102,126,234,.4)}50%{box-shadow:0 6px 30px rgba(102,126,234,.6)}}
+    .email-blast-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(102,126,234,.5)}
+    .email-blast-btn:active{transform:translateY(0);box-shadow:0 4px 15px rgba(102,126,234,.3)}
+    .email-blast-btn .icon{font-size:1.2rem;animation:emailBounce 1s ease-in-out infinite}
+    @keyframes emailBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+    /* Email Modal */
+    .email-modal-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.6);
+      display:none;justify-content:center;align-items:center;z-index:2000;
+      backdrop-filter:blur(8px);animation:fadeIn .3s ease
+    }
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .email-modal-overlay.show{display:flex}
+    .email-modal{
+      background:#fff;border-radius:24px;padding:40px;
+      max-width:600px;width:90%;max-height:90vh;overflow-y:auto;
+      box-shadow:0 25px 60px rgba(0,0,0,.3);
+      animation:slideUp .3s ease;position:relative
+    }
+    @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .email-modal h2{
+      color:#2d3748;font-size:1.8rem;margin-bottom:10px;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+    }
+    .email-modal .subtitle{color:#718096;margin-bottom:25px;font-size:.95rem}
+    .email-modal .form-group{margin-bottom:20px}
+    .email-modal label{display:block;font-weight:700;color:#2d3748;margin-bottom:8px;font-size:.95rem}
+    .email-modal input,.email-modal textarea{
+      width:100%;padding:12px 16px;border:2px solid #e2e8f0;
+      border-radius:12px;font-size:15px;transition:all .3s ease;
+      font-family:inherit;background:#fff
+    }
+    .email-modal input:focus,.email-modal textarea:focus{
+      outline:none;border-color:#667eea;
+      box-shadow:0 0 0 4px rgba(102,126,234,.1)
+    }
+    .email-modal textarea{min-height:120px;resize:vertical}
+    .email-modal .tutor-list{
+      background:rgba(248,250,252,.8);border-radius:12px;
+      padding:15px;margin-bottom:20px;max-height:150px;overflow-y:auto;
+      border:1px solid rgba(226,232,240,.5)
+    }
+    .email-modal .tutor-list strong{display:block;margin-bottom:8px;color:#2d3748}
+    .email-modal .tutor-tag{
+      display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);
+      color:#fff;padding:6px 12px;border-radius:8px;margin:4px;
+      font-size:.85rem;font-weight:600
+    }
+    .email-modal .button-group{display:flex;gap:12px;margin-top:25px}
+    .email-modal .btn-primary,.email-modal .btn-secondary{
+      flex:1;padding:14px 24px;border:none;border-radius:12px;
+      font-weight:700;font-size:1rem;cursor:pointer;transition:all .3s ease
+    }
+    .email-modal .btn-primary{
+      background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;
+      box-shadow:0 4px 15px rgba(102,126,234,.3)
+    }
+    .email-modal .btn-primary:hover{
+      transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,.4)
+    }
+    .email-modal .btn-secondary{background:#e2e8f0;color:#2d3748}
+    .email-modal .btn-secondary:hover{background:#cbd5e0}
+    .email-modal .close-btn{
+      position:absolute;top:20px;right:20px;background:none;
+      border:none;font-size:1.5rem;cursor:pointer;color:#718096;
+      width:32px;height:32px;border-radius:50%;
+      transition:all .2s ease;display:flex;align-items:center;justify-content:center
+    }
+    .email-modal .close-btn:hover{background:rgba(226,232,240,.5);color:#2d3748}
+
+    /* Success/Error Toast */
+    .toast{
+      position:fixed;top:80px;right:20px;
+      padding:16px 24px;border-radius:16px;
+      font-weight:600;z-index:3000;
+      box-shadow:0 8px 25px rgba(0,0,0,.2);
+      animation:slideInRight .3s ease;
+      max-width:400px;backdrop-filter:blur(10px)
+    }
+    @keyframes slideInRight{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.success{background:rgba(198,246,213,.95);color:#22543d;border:2px solid rgba(154,230,180,.5)}
+    .toast.error{background:rgba(254,215,215,.95);color:#742a2a;border:2px solid rgba(254,178,178,.5)}
+    .toast.hide{animation:slideOutRight .3s ease forwards}
+    @keyframes slideOutRight{from{transform:translateX(0);opacity:1}to{transform:translateX(400px);opacity:0}}
+
+    @media (max-width:768px){
+      .email-blast-btn{width:100%;justify-content:center;margin-bottom:12px}
+      .email-modal{padding:30px 20px}
+      .email-modal .button-group{flex-direction:column}
+      .filters-grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
@@ -91,6 +195,12 @@
     </div>
 
     <div class="filters-container">
+      <div style="margin-bottom:20px">
+        <button id="emailBlastBtn" class="email-blast-btn" title="Send email to filtered tutors">
+          <span class="icon">📧</span>
+          <span>Email Blast to Selected Tutors</span>
+        </button>
+      </div>
       <div class="filters-grid">
         <div class="filter-group">
           <label for="tutorFilter">🎓 Filter by Tutor:</label>
@@ -136,11 +246,48 @@
     </div>
   </div>
 
+  <!-- Email Modal -->
+  <div id="emailModal" class="email-modal-overlay">
+    <div class="email-modal">
+      <button class="close-btn" id="closeEmailModal" aria-label="Close">×</button>
+      <h2>📧 Send Email Blast</h2>
+      <p class="subtitle">Send an email to the selected tutors</p>
+      
+      <div class="tutor-list" id="recipientList">
+        <strong>Recipients:</strong>
+        <div id="recipientTags"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="emailSubject">Subject Line:</label>
+        <input type="text" id="emailSubject" placeholder="Enter email subject..." value="STD Email Blast: ">
+      </div>
+
+      <div class="form-group">
+        <label for="emailBody">Message:</label>
+        <textarea id="emailBody" placeholder="Type your message here...">Hello,
+
+This is an important update from the Student Tutor Dashboard team.
+
+Best regards,
+STD Team</textarea>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" id="cancelEmail">Cancel</button>
+        <button class="btn-primary" id="sendEmail">Send Email</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // === CONFIG ===
     const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj8qL6nzQ57q45IRZf5iWzyBPe_9mZwvvYH8zRe4CJdfc92qFTIs67jwv-sfWx6WM3U-tWeM0cDRE9/pub?gid=2014614666&single=true&output=csv";
     // Subjects tab published CSV (column U = Calendar Color; gid must match Subjects sheet)
     let subjectsCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vStfM_AuGTHtcz1JzK9zV5JwdFYe9fdtwyAwTt59uK6wbuIjhwHBndHsfXVoq_L8cJ27DFow0RKLSIn/pub?gid=1392008086&single=true&output=csv";
+
+    // *** REPLACE THIS WITH YOUR DEPLOYED WEB APP URL ***
+    const EMAIL_BLAST_URL = "YOUR_WEB_APP_URL_HERE";
 
     // Globals
     let calendar;
@@ -168,6 +315,19 @@
       errorDiv.className='error-message';
       errorDiv.innerHTML=`<strong>⚠️ Error</strong><br>${message}<br><small>Please refresh and try again.</small>`;
       calendarContainer.insertBefore(errorDiv,calendarContainer.firstChild);
+    }
+
+    // Toast notifications
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
     }
 
     // CSV helpers
@@ -309,6 +469,22 @@
       return map;
     }
 
+    // Get currently visible tutors
+    function getVisibleTutors() {
+      if (!calendar) return [];
+      const visible = new Set();
+      const events = calendar.getEvents();
+      
+      events.forEach(evt => {
+        if (evt.display !== 'none') {
+          const tutor = evt.extendedProps.tutor;
+          if (tutor) visible.add(tutor);
+        }
+      });
+      
+      return Array.from(visible).sort();
+    }
+
     // Filters
     function applyFiltersUI(){
       const tutorSelect=document.getElementById('tutorFilter');
@@ -431,6 +607,94 @@
     }
     function hideSubjectSuggestions(){ const box=document.getElementById('subjectSuggestions'); if(box){ box.style.display='none'; box.innerHTML=''; } }
 
+    // Email Blast Functions
+    function openEmailModal() {
+      const visibleTutors = getVisibleTutors();
+      
+      if (visibleTutors.length === 0) {
+        showToast('No tutors are currently selected or visible. Please filter or select tutors first.', 'error');
+        return;
+      }
+
+      // Populate recipient list
+      const recipientTags = document.getElementById('recipientTags');
+      recipientTags.innerHTML = visibleTutors.map(tutor => 
+        `<span class="tutor-tag">${tutor}</span>`
+      ).join('');
+
+      // Show modal
+      document.getElementById('emailModal').classList.add('show');
+    }
+
+    function closeEmailModal() {
+      document.getElementById('emailModal').classList.remove('show');
+    }
+
+    async function sendEmailBlast() {
+      const visibleTutors = getVisibleTutors();
+      const subject = document.getElementById('emailSubject').value.trim();
+      const body = document.getElementById('emailBody').value.trim();
+
+      // Validation
+      if (!subject || !subject.startsWith('STD Email Blast:')) {
+        showToast('Subject line must start with "STD Email Blast:"', 'error');
+        return;
+      }
+
+      if (!body) {
+        showToast('Please enter a message body', 'error');
+        return;
+      }
+
+      if (visibleTutors.length === 0) {
+        showToast('No tutors selected', 'error');
+        return;
+      }
+
+      // Disable send button
+      const sendBtn = document.getElementById('sendEmail');
+      const originalText = sendBtn.textContent;
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(EMAIL_BLAST_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tutors: visibleTutors,
+            subject: subject,
+            body: body
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          closeEmailModal();
+          showToast(`✅ ${result.message}`, 'success');
+          
+          // Log details
+          if (result.sent && result.sent.length > 0) {
+            console.log('Successfully sent to:', result.sent);
+          }
+          if (result.failed && result.failed.length > 0) {
+            console.warn('Failed to send to:', result.failed);
+          }
+        } else {
+          showToast(`❌ Error: ${result.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Email blast error:', error);
+        showToast(`❌ Failed to send emails: ${error.message}`, 'error');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = originalText;
+      }
+    }
+
     // Init
     document.addEventListener("DOMContentLoaded", async function(){
       try{
@@ -532,6 +796,17 @@
         });
         tutorFilter2.addEventListener('change',applyFiltersUI);
 
+        // Email Blast Event Listeners
+        document.getElementById('emailBlastBtn').addEventListener('click', openEmailModal);
+        document.getElementById('closeEmailModal').addEventListener('click', closeEmailModal);
+        document.getElementById('cancelEmail').addEventListener('click', closeEmailModal);
+        document.getElementById('sendEmail').addEventListener('click', sendEmailBlast);
+
+        // Close modal on overlay click
+        document.getElementById('emailModal').addEventListener('click', (e) => {
+          if (e.target.id === 'emailModal') closeEmailModal();
+        });
+
         // Close suggestions on outside click
         document.addEventListener('click',(e)=>{
           if(!suggBox) return;
@@ -557,6 +832,11 @@
       if(e.key==='ArrowLeft' && e.ctrlKey){ e.preventDefault(); calendar.prev(); }
       else if(e.key==='ArrowRight' && e.ctrlKey){ e.preventDefault(); calendar.next(); }
       else if(e.key==='Home' && e.ctrlKey){ e.preventDefault(); calendar.today(); }
+      // Close modal on Escape
+      else if(e.key==='Escape'){
+        const modal = document.getElementById('emailModal');
+        if(modal && modal.classList.contains('show')) closeEmailModal();
+      }
     });
 
     document.documentElement.style.scrollBehavior='smooth';
